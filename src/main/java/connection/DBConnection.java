@@ -15,7 +15,7 @@ public class DBConnection {
 	private static final String ORACLE_USER = "CSC584";
 	
 	//define and initialize database password
-	private static final String ORACLE_PASS = "0000";
+	private static final String ORACLE_PASS = "oracle";
 	
 	public static Connection getConnection() throws SQLException {
 

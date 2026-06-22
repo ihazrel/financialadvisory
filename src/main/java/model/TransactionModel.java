@@ -5,63 +5,58 @@ import java.util.Date;
 public class TransactionModel {
 
     private Integer transactionId;
-    private String transactionName;
-    private String transactionDescription;
-    private String transactionInvoiceNo;
-    private String transactionPayer;
-    private String transactionPayee;
+    private String name;
+    private String description;
+    private String invoiceNo;
+    private String payer;
+    private String payee;
     private Integer categoryId;
     private Integer departmentId;
-    private String transactionType;
-    private String transactionPaymentMethod;
+    private String type;
+    private String paymentMethod;
     private double totalAmount;
-    private String transactionCurrency;
-    private Date dateTransaction;
-    private String transactionStatus;
+    private String currency;
+    private Date date;
+    private String status;
     private Integer createdBy;
     private Integer verifiedBy;
 
-    // Public constructor
-    public TransactionModel() {
-    }
+    public TransactionModel() {}
 
-    // Full constructor
     public TransactionModel(Integer transactionId,
-                            String transactionName,
-                            String transactionDescription,
-                            String transactionInvoiceNo,
-                            String transactionPayer,
-                            String transactionPayee,
+                            String name,
+                            String description,
+                            String invoiceNo,
+                            String payer,
+                            String payee,
                             Integer categoryId,
                             Integer departmentId,
-                            String transactionType,
-                            String transactionPaymentMethod,
+                            String type,
+                            String paymentMethod,
                             double totalAmount,
-                            String transactionCurrency,
-                            Date dateTransaction,
-                            String transactionStatus,
+                            String currency,
+                            Date date,
+                            String status,
                             Integer createdBy,
                             Integer verifiedBy) {
 
         this.transactionId = transactionId;
-        this.transactionName = transactionName;
-        this.transactionDescription = transactionDescription;
-        this.transactionInvoiceNo = transactionInvoiceNo;
-        this.transactionPayer = transactionPayer;
-        this.transactionPayee = transactionPayee;
+        this.name = name;
+        this.description = description;
+        this.invoiceNo = invoiceNo;
+        this.payer = payer;
+        this.payee = payee;
         this.categoryId = categoryId;
         this.departmentId = departmentId;
-        this.transactionType = transactionType;
-        this.transactionPaymentMethod = transactionPaymentMethod;
+        this.type = type;
+        this.paymentMethod = paymentMethod;
         this.totalAmount = totalAmount;
-        this.transactionCurrency = transactionCurrency;
-        this.dateTransaction = dateTransaction;
-        this.transactionStatus = transactionStatus;
+        this.currency = currency;
+        this.date = date;
+        this.status = status;
         this.createdBy = createdBy;
         this.verifiedBy = verifiedBy;
     }
-
-    // Getters and Setters
 
     public Integer getTransactionId() {
         return transactionId;
@@ -71,44 +66,44 @@ public class TransactionModel {
         this.transactionId = transactionId;
     }
 
-    public String getTransactionName() {
-        return transactionName;
+    public String getName() {
+        return name;
     }
 
-    public void setTransactionName(String transactionName) {
-        this.transactionName = transactionName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTransactionDescription() {
-        return transactionDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setTransactionDescription(String transactionDescription) {
-        this.transactionDescription = transactionDescription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getTransactionInvoiceNo() {
-        return transactionInvoiceNo;
+    public String getInvoiceNo() {
+        return invoiceNo;
     }
 
-    public void setTransactionInvoiceNo(String transactionInvoiceNo) {
-        this.transactionInvoiceNo = transactionInvoiceNo;
+    public void setInvoiceNo(String invoiceNo) {
+        this.invoiceNo = invoiceNo;
     }
 
-    public String getTransactionPayer() {
-        return transactionPayer;
+    public String getPayer() {
+        return payer;
     }
 
-    public void setTransactionPayer(String transactionPayer) {
-        this.transactionPayer = transactionPayer;
+    public void setPayer(String payer) {
+        this.payer = payer;
     }
 
-    public String getTransactionPayee() {
-        return transactionPayee;
+    public String getPayee() {
+        return payee;
     }
 
-    public void setTransactionPayee(String transactionPayee) {
-        this.transactionPayee = transactionPayee;
+    public void setPayee(String payee) {
+        this.payee = payee;
     }
 
     public Integer getCategoryId() {
@@ -127,20 +122,20 @@ public class TransactionModel {
         this.departmentId = departmentId;
     }
 
-    public String getTransactionType() {
-        return transactionType;
+    public String getType() {
+        return type;
     }
 
-    public void setTransactionType(String transactionType) {
-        this.transactionType = transactionType;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getTransactionPaymentMethod() {
-        return transactionPaymentMethod;
+    public String getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setTransactionPaymentMethod(String transactionPaymentMethod) {
-        this.transactionPaymentMethod = transactionPaymentMethod;
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public double getTotalAmount() {
@@ -152,27 +147,27 @@ public class TransactionModel {
     }
 
     public String getCurrency() {
-        return transactionCurrency;
+        return currency;
     }
 
     public void setCurrency(String currency) {
-        this.transactionCurrency = currency;
+        this.currency = currency;
     }
 
-    public Date getDateTransaction() {
-        return dateTransaction;
+    public Date getDate() {
+        return date;
     }
 
-    public void setDateTransaction(Date dateTransaction) {
-        this.dateTransaction = dateTransaction;
+    public void setDate(Date date) {
+        this.date = date;
     }
-    
+
     public String getStatus() {
-		return transactionStatus;
-	}
-    
+        return status;
+    }
+
     public void setStatus(String status) {
-    	this.transactionStatus = status;
+        this.status = status;
     }
 
     public Integer getCreatedBy() {
