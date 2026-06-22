@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c"%>
 <%@ taglib uri="jakarta.tags.fmt" prefix="fmt"%>
-<%@ page import="dao.TransactionDOA,model.TransactionModel" %>
+<%@ page import="dao.TransactionDAO,model.TransactionModel" %>
 <%@ page import="java.util.ArrayList" %>
 
 <!DOCTYPE html>
@@ -160,7 +160,7 @@
 								<i class="bi bi-list-ul me-2"></i> Transaction List
 							</h5>
 							<div class="d-flex gap-2">
-									<a href="staff-transaction-details.jsp?action=create" class="btn btn-primary rounded-pill px-4">
+									<a href="staff-transaction-details.jsp?id=0" class="btn btn-primary rounded-pill px-4">
 										<i class="bi bi-plus-circle me-2"></i>Create New
 									</a>
 									<a href="#" class="btn btn-outline-primary rounded-pill px-4">
@@ -186,10 +186,10 @@
 
 									<tbody>
 										<%
-											TransactionDOA transactionDOA = new TransactionDOA();
-											ArrayList<TransactionModel> transactions = transactionDOA.getAllTransactions(); // Fetch transactions from database
-										
-											for (TransactionModel transaction : transactions) {
+										TransactionDAO transactionDOA = new TransactionDAO();
+																			ArrayList<TransactionModel> transactions = transactionDOA.getAllTransactions(); // Fetch transactions from database
+																		
+																			for (TransactionModel transaction : transactions) {
 										%>
 										<tr>
 											<td><%= transaction.getDateTransaction() %></td>
@@ -214,7 +214,7 @@
 										<%
 											}
 										%>
-										<tr>
+										<!-- <tr>
 											<td>2026-01-08</td>
 											<td>Office Rent</td>
 											<td><span class="badge rounded-pill text-bg-danger">Expense</span></td>
@@ -231,7 +231,7 @@
 										<tr>
 											<td>2026-01-10</td>
 											<td>Internet Bill</td>
-											<td><span class="badge rounded-pill text-bg-danger">Expense</span></td>
+					s						<td><span class="badge rounded-pill text-bg-danger">Expense</span></td>
 											<td>Utilities</td>
 											<td>Online Payment</td>
 											<td class="text-end text-danger fw-bold">RM 76,432.00</td>
@@ -269,7 +269,7 @@
 												<a href="staff-transaction-details.jsp?action=edit&id=invoice-001" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-pencil-square"></i></a>
 												<a href="#" class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i></a>
 											</td>
-										</tr>
+										</tr> -->
 									</tbody>
 							</table>
 						</div>

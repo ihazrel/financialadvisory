@@ -1,9 +1,26 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ page import="model.TransactionModel, dao.TransactionDAO" %>
+<%@ page import="model.TransactionItemModel, dao.TransactionItemDAO" %>
+<%@ page import="model.AttachmentModel, dao.AttachmentDAO" %>
+<%@ page import="dao.CategoryDAO, model.CategoryModel" %>
+<%@ page import="java.util.ArrayList" %>
+
 <%
+	TransactionDAO transactionDAO = new TransactionDAO();
+	TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
+	AttachmentDAO attachmentDAO = new AttachmentDAO();
+
 	String action = request.getParameter("action");
 	boolean isCreate = "create".equals(action);
 	boolean isEdit = "edit".equals(action);
+	
+	int id = request.getParameter("id") != null ? Integer.parseInt(request.getParameter("id")) : -1;
+	
+	TransactionModel local_transaction = transactionDAO.getTransactionById(id);
+	ArrayList<TransactionItemModel> local_items = transactionItemDAO.getTransactionItemsByTransactionId(id);
+	ArrayList<AttachmentModel> local_attachments = attachmentDAO.getAttachmentsByTransactionId(id);
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,7 +58,7 @@
 
 	.line-item-grid {
 		display: grid;
-		grid-template-columns: minmax(180px, 1fr) 120px 140px 140px 44px;
+		grid-template-columns: 150px minmax(180px, 1fr) 120px 140px 140px 44px;
 		gap: .75rem;
 		align-items: center;
 	}
@@ -103,7 +120,7 @@
 
 					<section class="card border-0 shadow-sm transaction-form-card">
 						<div class="card-body p-4">
-							<form action="#" method="post" enctype="multipart/form-data">
+							<form action="TransactionController" method="post" enctype="multipart/form-data">
 								<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 mb-4 border-bottom">
 									<h5 class="fw-bold mb-0">
 										<i class="bi bi-receipt me-2"></i><%= isCreate ? "Add New Transaction" : "Edit Transaction" %>
@@ -118,58 +135,61 @@
 									<div class="col-md-6">
 										<label class="form-label">Transaction Title</label>
 										<input type="text" class="form-control rounded-3" name="title"
-											value="<%= isCreate ? "ABC Supplier Sdn Bhd - INV-0001" : "Office Rent" %>" placeholder="Example: Office Rent">
+											value="<%= local_transaction != null ? local_transaction.getName() : "" %>" placeholder="Example: Office Rent">
 									</div>
 									<div class="col-md-3">
 										<label class="form-label">Type</label>
-										<select class="form-select rounded-3" name="type">
-											<option>Income</option>
-											<option selected>Expense</option>
+										<select class="form-select rounded-3" name="transactionType">
+											<option value="income" <%= (local_transaction != null && "income".equalsIgnoreCase(local_transaction.getTransactionType())) ? "selected" : "" %>>Income</option>
+											<option value="expense" <%= (local_transaction != null && "expense".equalsIgnoreCase(local_transaction.getTransactionType())) ? "selected" : "" %>>Expense</option>
 										</select>
 									</div>
 									<div class="col-md-3">
 										<label class="form-label">Category</label>
-										<select class="form-select rounded-3" name="category">
-											<option>Sales</option>
-											<option <%= isCreate ? "" : "selected" %>>Rent</option>
-											<option>Utilities</option>
-											<option>Salary</option>
-											<option>Marketing</option>
-											<option <%= isCreate ? "selected" : "" %>>Supplies</option>
-											<option>Travel</option>
-											<option>Training</option>
-											<option>Others</option>
+										<select class="form-select rounded-3" name="categoryId">
+												<option value="">Select Category</option>
+	                                        <%
+	                                        	CategoryDAO categoryDAO = new CategoryDAO();
+	                                        	ArrayList<CategoryModel> categories = categoryDAO.getAllCategories();
+	                                        	for (CategoryModel category : categories) {
+	                                        %>
+	                                        	<option value="<%= category.getCategoryId() %>" <%= (local_transaction != null && local_transaction.getCategoryId() == category.getCategoryId()) ? "selected" : "" %>>
+	                                        		<%= category.getName() %>
+	                                        	</option>
+	                                        <%
+	                                        	}
+	                                        %>
 										</select>
 									</div>
 									<div class="col-md-4">
 										<label class="form-label">Amount (RM)</label>
 										<input type="number" step="0.01" class="form-control rounded-3"
-											name="amount" value="<%= isCreate ? "477.00" : "32471.00" %>" placeholder="0.00">
+											name="amount" value="<%= local_transaction != null ? local_transaction.getTotalAmount() : "" %>" placeholder="0.00">
 									</div>
 									<div class="col-md-4">
 										<label class="form-label">Transaction Date</label>
 										<input type="date" class="form-control rounded-3"
-											name="transactionDate" value="<%= isCreate ? "2026-01-20" : "2026-01-08" %>">
+											name="transactionDate" value="<%= local_transaction != null ? local_transaction.getDateTransaction() : "" %>" placeholder="Select transaction date">
 									</div>
 									<div class="col-md-4">
-										<label class="form-label">Source</label>
+										<label class="form-label">Payment Method</label>
 										<input type="text" class="form-control rounded-3"
-											name="source" value="<%= isCreate ? "Invoice" : "Bank Transfer" %>">
+											name="paymentMethod" value="<%= local_transaction != null ? local_transaction.getPaymentMethod() : "" %>" placeholder="e.g. Bank Transfer, Credit Card, Cash">
 									</div>
 									<div class="col-md-6">
 										<label class="form-label">Invoice / Reference Number</label>
-										<input type="text" class="form-control rounded-3" name="referenceNumber"
-											value="<%= isCreate ? "INV-0001" : "RENT-2026-001" %>" placeholder="Invoice or payment reference">
+										<input type="text" class="form-control rounded-3" name="invoiceNo"
+											value="<%= local_transaction != null ? local_transaction.getInvoiceNo() : "" %>" placeholder="Invoice or payment reference">
 									</div>
 									<div class="col-md-6">
 										<label class="form-label">Vendor / Payee Name</label>
-										<input type="text" class="form-control rounded-3" name="vendorName"
-											value="<%= isCreate ? "ABC Supplier Sdn Bhd" : "City Office Properties" %>" placeholder="Vendor, customer, or payee">
+										<input type="text" class="form-control rounded-3" name="payee"
+											value="<%= local_transaction != null ? local_transaction.getPayee() : "" %>" placeholder="Vendor, customer, or payee">
 									</div>
 									<div class="col-12">
 										<label class="form-label">Reason / Description</label>
 										<textarea class="form-control rounded-3" rows="4" name="description"
-											placeholder="Explain transaction purpose"><%= isCreate ? "Office supplies purchased for company operations. Auto extracted from uploaded invoice." : "Monthly office rental payment for January 2026." %></textarea>
+											placeholder="Explain transaction purpose"><%= local_transaction != null ? local_transaction.getDescription() : "" %></textarea>
 									</div>
 								</div>
 
@@ -184,7 +204,8 @@
 									</div>
 
 									<div class="line-item-grid text-secondary small fw-semibold mb-2 d-none d-md-grid">
-										<span>Item / Description</span>
+										<span>Item</span>
+										<span>Description</span>
 										<span>Quantity</span>
 										<span>Unit Price</span>
 										<span>Total</span>
@@ -192,24 +213,30 @@
 									</div>
 
 									<div id="lineItems" class="vstack gap-2">
-										<div class="line-item-grid line-item-row">
-											<input type="text" class="form-control rounded-3" name="itemDescription" value="Office Supplies">
-											<input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="3" min="0" step="1">
-											<input type="number" class="form-control rounded-3 item-price" name="itemUnitPrice" value="150.00" min="0" step="0.01">
-											<input type="number" class="form-control rounded-3 item-total fw-bold" name="itemTotal" value="450.00" min="0" step="0.01">
-											<button type="button" class="btn btn-outline-danger rounded-circle remove-row" aria-label="Delete item">
-												<i class="bi bi-trash"></i>
-											</button>
-										</div>
-										<div class="line-item-grid line-item-row">
-											<input type="text" class="form-control rounded-3" name="itemDescription" value="Service Tax">
-											<input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="1" min="0" step="1">
-											<input type="number" class="form-control rounded-3 item-price" name="itemUnitPrice" value="27.00" min="0" step="0.01">
-											<input type="number" class="form-control rounded-3 item-total fw-bold" name="itemTotal" value="27.00" min="0" step="0.01">
-											<button type="button" class="btn btn-outline-danger rounded-circle remove-row" aria-label="Delete item">
-												<i class="bi bi-trash"></i>
-											</button>
-										</div>
+										<%
+											if (local_items != null && !local_items.isEmpty()) {
+                                                for (TransactionItemModel item : local_items) {
+										%>
+											<div class="line-item-grid line-item-row">
+												<input type="text" class="form-control rounded-3" name="itemName" value="<%= item.getName() %>">
+												<input type="text" class="form-control rounded-3" name="itemDescription" value="<%= item.getDescription() %>">
+												<input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="<%= item.getQuantity() %>" min="0" step="1">
+												<input type="number" class="form-control rounded-3 item-price" name="itemUnitPrice" value="<%= item.getUnitPrice() %>" min="0" step="0.01">
+												<input type="number" class="form-control rounded-3 item-total fw-bold" name="itemTotal" value="<%= item.getQuantity() * item.getUnitPrice() %>" min="0" step="0.01">
+												<button type="button" class="btn btn-outline-danger rounded-circle remove-row" aria-label="Delete item">
+													<i class="bi bi-trash"></i>
+												</button>
+											</div>
+											<%
+                                                }
+                                            } else {
+										%>
+											<div class="no-items-message text-center text-muted py-3">
+                                                No items added yet. Click "Add Item" to start.
+                                            </div>
+                                        	<%
+                                            }
+										%>
 									</div>
 
 									<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
@@ -218,8 +245,8 @@
 										</button>
 										<div class="d-flex align-items-center gap-3">
 											<span class="fw-bold">Grand Total</span>
-											<input type="number" class="form-control rounded-3 fw-bold text-danger" id="grandTotal"
-												name="grandTotal" value="477.00" readonly style="max-width: 160px;">
+											<input type="number" class="form-control rounded-3 fw-bold text-danger" id="totalAmount"
+												name="totalAmount" value="<%= local_transaction != null ? local_transaction.getTotalAmount() : "" %>" readonly style="max-width: 160px;">
 										</div>
 									</div>
 								</div>
@@ -236,33 +263,41 @@
 									</div>
 
 									<div id="attachmentList" class="vstack gap-2">
+									
+									<% if (local_attachments != null && !local_attachments.isEmpty()) {
+									   		for (AttachmentModel attachment : local_attachments) { %>
 										<div class="attachment-row border-bottom pb-2">
 											<div>
 												<i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-												<span class="fw-semibold">INV-0001.pdf</span>
+												<span class="fw-semibold"><%= attachment.getName() %></span>
 											</div>
-											<span class="text-secondary small">Invoice PDF</span>
+											<span class="text-secondary small"><%= attachment.getDescription() %></span>
 											<button type="button" class="btn btn-outline-danger rounded-circle remove-attachment" aria-label="Delete attachment">
 												<i class="bi bi-trash"></i>
 											</button>
 										</div>
-										<div class="attachment-row border-bottom pb-2">
-											<div>
-												<i class="bi bi-file-earmark-image text-primary me-2"></i>
-												<span class="fw-semibold">delivery-order.png</span>
-											</div>
-											<span class="text-secondary small">Supporting File</span>
-											<button type="button" class="btn btn-outline-danger rounded-circle remove-attachment" aria-label="Delete attachment">
-												<i class="bi bi-trash"></i>
-											</button>
-										</div>
+										<%
+                                                }
+                                            } else {
+										%>
+											<div class="no-items-message text-center text-muted py-3">
+                                                No items added yet. Click "Upload Attachment" to start.
+                                            </div>
+                                        	<%
+                                            }
+										%>
 									</div>
 								</div>
 
 								<div class="d-flex flex-wrap justify-content-end gap-2">
 									<a class="btn btn-outline-secondary rounded-pill px-4" href="staff-transaction.jsp">Cancel</a>
-									<button class="btn btn-primary rounded-pill px-4" type="submit">
-										<i class="bi bi-send-check me-2"></i><%= isEdit ? "Save Changes" : "Submit Transaction" %>
+									
+									<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="save">
+										<i class="bi bi-send-check me-2"></i>Save
+									</button>
+									
+									<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="submit">
+										<i class="bi bi-send-check me-2"></i>Submit Transaction
 									</button>
 								</div>
 							</form>
@@ -342,11 +377,26 @@
 				.reduce((sum, input) => sum + (Number(input.value) || 0), 0);
 			grandTotal.value = total.toFixed(2);
 		}
+		
+		function removeEmptyMessage(containerId) {
+            const noItemsMessage = document.getElementById(containerId).querySelector(".no-items-message");
+            if (noItemsMessage) {
+                noItemsMessage.classList.add("d-none");
+            }
+        }
+		
+		function addEmptyMessage(containerId, message) {
+			const noItemsMessage = document.getElementById(containerId).querySelector(".no-items-message");
+			noItemsMessage.classList.remove("d-none");
+        }
 
 		document.getElementById("addItemBtn").addEventListener("click", () => {
+			removeEmptyMessage("lineItems");
+			
 			const row = document.createElement("div");
 			row.className = "line-item-grid line-item-row";
 			row.innerHTML = `
+				<input type="text" class="form-control rounded-3" name="itemName" placeholder="Item name">
 				<input type="text" class="form-control rounded-3" name="itemDescription" placeholder="Item description">
 				<input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="1" min="0" step="1">
 				<input type="number" class="form-control rounded-3 item-price" name="itemUnitPrice" value="0.00" min="0" step="0.01">
@@ -376,6 +426,15 @@
 				return;
 			}
 			button.closest(".line-item-row").remove();
+			
+			// If there are no more line items, show the "no items" message
+			const remainingRows = lineItems.querySelectorAll(".line-item-row");
+			const noItemsMessage = document.getElementById("noItemsMessage");
+			
+			if (remainingRows.length === 0 && noItemsMessage) {
+               noItemsMessage.classList.remove("d-none");
+            }
+			
 			updateGrandTotal();
 		});
 
