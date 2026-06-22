@@ -1,47 +1,54 @@
 package model;
 
 public class CategoryModel {
-	private int categoryId;
-	private String name;
-	private boolean isGeneric;
-	private int parentCategoryId;
-	
-	public CategoryModel(int categoryId, String name, boolean isGeneric, int parentCategoryId) {
-		this.categoryId = categoryId;
-		this.name = name;
-		this.isGeneric = isGeneric;
-		this.parentCategoryId = parentCategoryId;
-	}
-	
-	public int getCategoryId() {
-		return categoryId;
-	}
-	
-	public void setCategoryId(int categoryId) {
-		this.categoryId = categoryId;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public boolean isGeneric() {
-		return isGeneric;
-	}
-	
-	public void setGeneric(boolean isGeneric) {
-		this.isGeneric = isGeneric;
-	}
-	
-	public int getParentCategoryId() {
-		return parentCategoryId;
-	}
-	
-	public void setParentCategoryId(int parentCategoryId) {
-		this.parentCategoryId = parentCategoryId;
-	}
+
+    private Integer categoryId;
+    private String name;
+    private boolean generic;
+    private Integer parentCategoryId;
+
+    public CategoryModel() {}
+
+    public CategoryModel(Integer categoryId,
+                         String name,
+                         boolean generic,
+                         Integer parentCategoryId) {
+
+        this.categoryId = categoryId;
+        this.name = name;
+        this.generic = generic;
+        this.parentCategoryId = parentCategoryId;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isGeneric() {
+        return generic;
+    }
+
+    public void setGeneric(boolean generic) {
+        this.generic = generic;
+    }
+
+    public Integer getParentCategoryId() {
+        return parentCategoryId;
+    }
+
+    public void setParentCategoryId(Integer parentCategoryId) {
+        this.parentCategoryId = parentCategoryId;
+    }
 }

@@ -1,68 +1,76 @@
 package model;
 
 public class UserModel {
-		private int userId;
-	private String name;
-	private String password;
-	private String email;
-	private int roleId;
-	private int departmentId;
 
-	public UserModel() {}
-	
-	public UserModel(int userId, String name, String email, int roleId, int departmentId) {
-		this.userId = userId;
-		this.name = name;
-		this.email = email;
-		this.roleId = roleId;
-		this.departmentId = departmentId;
-	}
+    private Integer userId;
+    private String name;
+    private String password;
+    private String email;
+    private Integer roleId;
+    private Integer departmentId;
 
-	public int getUserId() {
-		return userId;
-	}
-	
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
+    public UserModel() {}
 
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
+    public UserModel(Integer userId,
+                     String name,
+                     String password,
+                     String email,
+                     Integer roleId,
+                     Integer departmentId) {
 
-	public String getPass() {
-		return password;
-	}
-	
-	public void setPass(String password) {
-		this.password = password;
-	}
-	
-	public String getEmail() {
-		return email;
-	}
-	
-	public void setEmail(String email) {
-		this.email = email;
-	}
+        this.userId = userId;
+        this.name = name;
+        this.password = password;
+        this.email = email;
+        this.roleId = roleId;
+        this.departmentId = departmentId;
+    }
 
-	public int getRoleId() {
-		return roleId;
-	}
+    public Integer getUserId() {
+        return userId;
+    }
 
-	public void setRoleId(int roleId) {
-		this.roleId = roleId;
-	}
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 
-	public int getDepartmentId() {
-		return departmentId;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setDepartmentId(int departmentId) {
-		this.departmentId = departmentId;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
+    }
+
+    public Integer getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Integer departmentId) {
+        this.departmentId = departmentId;
+    }
 }

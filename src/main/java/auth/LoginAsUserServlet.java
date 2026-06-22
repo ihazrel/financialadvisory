@@ -45,7 +45,7 @@ public class LoginAsUserServlet extends HttpServlet {
                         int roleId = rs.getInt("roleId");
                         int departmentId = rs.getInt("departmentId");
                         
-                        UserModel user = new UserModel(userId, name, email, roleId, departmentId);
+                        UserModel user = new UserModel(userId, name, email, email, roleId, departmentId);
                         
                         request.getSession().setAttribute("user", user);
                         request.getSession().setAttribute("theme", RoleHelper.getTheme(user.getRoleId()));

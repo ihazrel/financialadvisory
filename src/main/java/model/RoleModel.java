@@ -1,24 +1,24 @@
 package model;
 
 public class RoleModel {
-	private int roleId;
+	private Integer roleId;
 	private String roleName;
-	private String description;
+	private String roleDescription;
 
 	
 	public RoleModel() {}
 
-	public RoleModel(int roleId, String roleName, String description) {
+	public RoleModel(Integer roleId, String roleName, String roleDescription) {
 		this.roleId = roleId;
 		this.roleName = roleName;
-		this.description = description;
+		this.roleDescription = roleDescription;
 	}
 
-	public int getRoleId() {
+	public Integer getRoleId() {
 		return roleId;
 	}
 	
-	public void setRoleId(int roleId) {
+	public void setRoleId(Integer roleId) {
 		this.roleId = roleId;
 	}
 
@@ -31,10 +31,10 @@ public class RoleModel {
 	}
 	
 	public String getDescription() {
-		return description;
+		return roleDescription;
 	}
 	
 	public void setDescription(String description) {
-		this.description = description;
+		this.roleDescription = description;
 	}
 }
