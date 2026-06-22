@@ -12,11 +12,11 @@ public class TransactionModel {
     private String payee;
     private Integer categoryId;
     private Integer departmentId;
-    private String type;
+    private String transactionType;
     private String paymentMethod;
     private double totalAmount;
     private String currency;
-    private Date date;
+    private Date dateTransaction;
     private String status;
     private Integer createdBy;
     private Integer verifiedBy;
@@ -31,11 +31,11 @@ public class TransactionModel {
                             String payee,
                             Integer categoryId,
                             Integer departmentId,
-                            String type,
+                            String transactionType,
                             String paymentMethod,
                             double totalAmount,
                             String currency,
-                            Date date,
+                            Date dateTransaction,
                             String status,
                             Integer createdBy,
                             Integer verifiedBy) {
@@ -48,11 +48,11 @@ public class TransactionModel {
         this.payee = payee;
         this.categoryId = categoryId;
         this.departmentId = departmentId;
-        this.type = type;
+        this.transactionType = transactionType;
         this.paymentMethod = paymentMethod;
         this.totalAmount = totalAmount;
         this.currency = currency;
-        this.date = date;
+        this.dateTransaction = dateTransaction;
         this.status = status;
         this.createdBy = createdBy;
         this.verifiedBy = verifiedBy;
@@ -122,12 +122,12 @@ public class TransactionModel {
         this.departmentId = departmentId;
     }
 
-    public String getType() {
-        return type;
+    public String getTransactionType() {
+        return transactionType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
     }
 
     public String getPaymentMethod() {
@@ -154,12 +154,12 @@ public class TransactionModel {
         this.currency = currency;
     }
 
-    public Date getDate() {
-        return date;
+    public Date getDateTransaction() {
+        return dateTransaction;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setDateTransaction(Date dateTransaction) {
+        this.dateTransaction = dateTransaction;
     }
 
     public String getStatus() {
