@@ -206,8 +206,8 @@
 											<td><span class="badge rounded-pill text-bg-warning">Pending Verification</span></td>
 											<% } %>
 											<td class="text-center">
-												<a class="btn btn-sm btn-outline-secondary rounded-pill" href="staff-transaction-details.jsp?id=sales-001"><i class="bi bi-eye"></i></a>
-												<a href="staff-transaction-details.jsp?action=edit&id=sales-001" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-pencil-square"></i></a>
+												<a class="btn btn-sm btn-outline-secondary rounded-pill" href="staff-transaction-details.jsp?id=<%= transaction.getTransactionId() %>"><i class="bi bi-eye"></i></a>
+												<a href="staff-transaction-details.jsp?action=edit&id=<%= transaction.getTransactionId() %>" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-pencil-square"></i></a>
 												<a href="#" class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i></a>
 											</td>
 										</tr>

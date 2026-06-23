@@ -121,6 +121,8 @@
 					<section class="card border-0 shadow-sm transaction-form-card">
 						<div class="card-body p-4">
 							<form action="TransactionController" method="post" enctype="multipart/form-data">
+								<input type="hidden" name="transactionId" value="<%= local_transaction != null ? local_transaction.getTransactionId() : null %>">
+							
 								<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 mb-4 border-bottom">
 									<h5 class="fw-bold mb-0">
 										<i class="bi bi-receipt me-2"></i><%= isCreate ? "Add New Transaction" : "Edit Transaction" %>
@@ -218,6 +220,7 @@
                                                 for (TransactionItemModel item : local_items) {
 										%>
 											<div class="line-item-grid line-item-row">
+												<input type="hidden" name="itemId" value="<%= item.getTransactionItemId() %>">
 												<input type="text" class="form-control rounded-3" name="itemName" value="<%= item.getName() %>">
 												<input type="text" class="form-control rounded-3" name="itemDescription" value="<%= item.getDescription() %>">
 												<input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="<%= item.getQuantity() %>" min="0" step="1">
@@ -245,8 +248,8 @@
 										</button>
 										<div class="d-flex align-items-center gap-3">
 											<span class="fw-bold">Grand Total</span>
-											<input type="number" class="form-control rounded-3 fw-bold text-danger" id="totalAmount"
-												name="totalAmount" value="<%= local_transaction != null ? local_transaction.getTotalAmount() : "" %>" readonly style="max-width: 160px;">
+											<input type="number" class="form-control rounded-3 fw-bold text-danger" id="totalAmount" step="0.1"
+												name="totalAmount" value="<%= local_transaction != null ? local_transaction.getTotalAmount() : "" %>" style="max-width: 160px;">
 										</div>
 									</div>
 								</div>
@@ -292,7 +295,7 @@
 								<div class="d-flex flex-wrap justify-content-end gap-2">
 									<a class="btn btn-outline-secondary rounded-pill px-4" href="staff-transaction.jsp">Cancel</a>
 									
-									<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="save">
+									<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="<%= local_transaction != null ? "update" : "create"%>">
 										<i class="bi bi-send-check me-2"></i>Save
 									</button>
 									
@@ -363,8 +366,9 @@
 	<script src="js/chatbot-widget.js?v=2"></script>
 	<script>
 		const lineItems = document.getElementById("lineItems");
-		const grandTotal = document.getElementById("grandTotal");
+		const grandTotal = document.getElementById("totalAmount");
 
+		// 
 		function updateLineTotal(row) {
 			const qty = Number(row.querySelector(".item-qty").value) || 0;
 			const price = Number(row.querySelector(".item-price").value) || 0;
@@ -373,9 +377,18 @@
 		}
 
 		function updateGrandTotal() {
-			const total = [...document.querySelectorAll(".item-total")]
-				.reduce((sum, input) => sum + (Number(input.value) || 0), 0);
-			grandTotal.value = total.toFixed(2);
+		    const inputs = lineItems.querySelectorAll(".item-total");
+
+		    let total = 0;
+
+		    inputs.forEach(input => {
+		        const value = parseFloat(input.value);
+		        if (!isNaN(value)) {
+		            total += value;
+		        }
+		    });
+
+		    grandTotal.value = total.toFixed(2);
 		}
 		
 		function removeEmptyMessage(containerId) {
@@ -420,22 +433,74 @@
 			}
 		});
 
-		lineItems.addEventListener("click", (event) => {
+		lineItems.addEventListener("click", async (event) => {
 			const button = event.target.closest(".remove-row");
+			
 			if (!button) {
 				return;
 			}
-			button.closest(".line-item-row").remove();
 			
-			// If there are no more line items, show the "no items" message
-			const remainingRows = lineItems.querySelectorAll(".line-item-row");
-			const noItemsMessage = document.getElementById("noItemsMessage");
+			const row = button.closest(".line-item-row");
+			const itemIdInput = row.querySelector("input[name='itemId']");
+			const itemId = itemIdInput ? itemIdInput.value : null;
 			
-			if (remainingRows.length === 0 && noItemsMessage) {
-               noItemsMessage.classList.remove("d-none");
-            }
+			const isConfirmed = confirm("Are you sure you want to delete this line item?");
+			if (!isConfirmed) return;
 			
-			updateGrandTotal();
+			if (!itemId) {
+			    row.remove();
+			    updateGrandTotal();
+			    return;
+			}
+			
+			try {
+				const formData = new URLSearchParams();
+				formData.append("action", "delete");
+				formData.append("itemId", itemId)
+				
+		        const res = await fetch(`${window.location.origin}/aiadvisoryfinancial/TransactionItemController`, {
+		            method: "POST",
+		            headers: {
+		                "Content-Type": "application/x-www-form-urlencoded"
+		            },
+		            body: formData.toString()
+		        });
+
+		        if (!res.ok) throw new Error("Failed request");
+
+		        let result;
+
+		        try {
+		            result = await res.json();
+		        } catch (err) {
+		            console.error("Invalid JSON response", err);
+		            alert("Server returned invalid response");
+		            return;
+		        }
+
+		        if (!result.success) {
+		            alert("Delete failed on server");
+		            return;
+		        } 
+		        
+		        alert("Item deleted successfully.");
+		        
+				row.remove();
+				
+				// If there are no more line items, show the "no items" message
+				const remainingRows = lineItems.querySelectorAll(".line-item-row");
+				const noItemsMessage = document.getElementById("noItemsMessage");
+				
+				if (remainingRows.length === 0 && noItemsMessage) {
+	               noItemsMessage.classList.remove("d-none");
+	            }
+				
+				updateGrandTotal();
+			
+			} catch (err) {
+				console.error(err);
+				alert("Server error while deleting item.")
+			}
 		});
 
 		document.getElementById("attachmentList").addEventListener("click", (event) => {

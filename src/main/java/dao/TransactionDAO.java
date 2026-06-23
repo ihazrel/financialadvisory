@@ -89,12 +89,11 @@ public class TransactionDAO {
 		return new ArrayList<>(); // Placeholder return statement
 	}
 	
-	public void createTransaction(TransactionModel transaction) {
+	public Integer createTransaction(TransactionModel transaction) {
 		// Code to create a new transaction in the database
 		
 		try {
 			Connection conn = DBConnection.getConnection();
-			Statement stmt = conn.createStatement();
 			
 			String sql = "INSERT INTO transaction (name, description, invoiceNo, payer, payee, categoryId, departmentId, transactionType, paymentMethod, totalAmount, currency, dateTransaction, status, createdBy, verifiedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
@@ -117,36 +116,73 @@ public class TransactionDAO {
 			pstmt.setInt(14, transaction.getCreatedBy());
 			pstmt.setInt(15, transaction.getVerifiedBy());
 
-			pstmt.executeUpdate();
+			boolean success = pstmt.executeUpdate() > 0;
+			
+			if (success) {
+				sql = "SELECT transactionId from transaction ORDER BY transactionId DESC FETCH FIRST 1 row only";
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql);
+				if (rs.next()) {
+					return rs.getInt("transactionId");
+				}
+			} else {
+				return null; // Return null if the insert was not successful
+			}
+
 			conn.close();
+			
 		} catch (Exception e) {
 			System.out.println(e);
 		}
+		return null; // Return null for now, you can modify this to return the generated transaction ID if needed
 	}
 	
-	public void updateTransaction(TransactionModel transaction) {
+	public Integer updateTransaction(TransactionModel transaction) {
 		// Code to update the transaction in the database
 		 
 		 try {
 				Connection conn = DBConnection.getConnection();
-				Statement stmt = conn.createStatement();
 				
 				TransactionModel existingTransaction = getTransactionById(transaction.getTransactionId());
 				
 				if (existingTransaction == null) {
 					System.out.println("Transaction with ID " + transaction.getTransactionId() + " does not exist.");
-					return;
+					return null;
 				}
 				
 				transaction.setTransactionId(existingTransaction.getTransactionId()); // Ensure the transaction ID is set correctly
 				
 				String sql = "UPDATE transaction SET name=?, description=?, invoiceNo=?, payer=?, payee=?, categoryId=?, departmentId=?, transactionType=?, paymentMethod=?, totalAmount=?, currency=?, dateTransaction=?, status=?, createdBy=?, verifiedBy=? WHERE transactionId=?";
-				sql = sql.replaceFirst("\\?", "'" + transaction.getName() + "'");
-				stmt.executeUpdate(sql);
-				conn.close();
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setString(1, transaction.getName());
+				pstmt.setString(2, transaction.getDescription());
+				pstmt.setString(3, transaction.getInvoiceNo());
+				pstmt.setString(4, transaction.getPayer());
+				pstmt.setString(5, transaction.getPayee());
+				pstmt.setInt(6, transaction.getCategoryId());
+				pstmt.setInt(7, transaction.getDepartmentId());
+				pstmt.setString(8, transaction.getTransactionType());
+				pstmt.setString(9, transaction.getPaymentMethod());
+				pstmt.setDouble(10, transaction.getTotalAmount());
+				pstmt.setString(11, transaction.getCurrency());
+				pstmt.setDate(12, (Date) transaction.getDateTransaction());
+				pstmt.setString(13, transaction.getStatus());
+				pstmt.setInt(14, transaction.getCreatedBy());
+				pstmt.setInt(15, transaction.getVerifiedBy());
+				pstmt.setInt(16, transaction.getTransactionId());
+				
+				if (pstmt.executeUpdate() > 0) {
+					// Transaction updated successfully
+					return existingTransaction.getTransactionId(); // Return the transaction ID
+				} else {
+					return null; // Return null if the update was not successful
+				}
+				
 			} catch (Exception e) {
 				System.out.println(e);
 			}
+		 return null; // Return null if an error occurs
 	}
 	
 	public void deleteTransaction(int transactionId) {

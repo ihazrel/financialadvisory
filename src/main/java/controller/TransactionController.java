@@ -7,12 +7,16 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.TransactionModel;
+import model.TransactionItemModel;
 import util.RequestUtil;
+
 
 import java.io.IOException;
 import java.sql.Date;
+import java.util.ArrayList;
 
 import dao.TransactionDAO;
+import dao.TransactionItemDAO;
 
 /**
  * Servlet implementation class TransactionController
@@ -43,20 +47,14 @@ public class TransactionController extends HttpServlet {
 		}
 		
 		switch (action) {
-		case "save":
+		case "create":
 				// Call the method to create a transaction
-				if (request.getParameter("transactionId") == null || request.getParameter("transactionId").isEmpty()) {
-					// If transactionId is null or empty, create a new transaction
-					createTransaction(request, response);
-				} else {
-					// If transactionId is provided, update the existing transaction
-					//updateTransaction(request, response);
-				}
+				createTransaction(request, response);
 				break;
 				
 			case "update":
 				// Call the method to update a transaction
-				//updateTransaction(request, response);
+				updateTransaction(request, response);
 				break;
 			case "delete":
 				// Call the method to delete a transaction
@@ -68,66 +66,106 @@ public class TransactionController extends HttpServlet {
 	}
 	
 	private void createTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Implement the logic to create a transaction
-		// For example, you can retrieve parameters from the request and save them to the database
-		String name =  RequestUtil.getString(request, "title");
-		String description = RequestUtil.getString(request, "description");
-		String invoiceNo = RequestUtil.getString(request, "invoiceNo");
-		String payer = RequestUtil.getString(request, "payer");
-		String payee = RequestUtil.getString(request, "payee");
 		
-		int categoryId = RequestUtil.getInt(request, "categoryId");
-		int departmentId = RequestUtil.getInt(request, "departmentId");
+		TransactionModel transaction = buildTransaction(request, true);
+		ArrayList<TransactionItemModel> items = buildTransactionItems(request);
 		
-		String transactionType = RequestUtil.getString(request, "transactionType");
-		String paymentMethod = RequestUtil.getString(request, "paymentMethod");
-		
-		double totalAmount = RequestUtil.getDouble(request, "totalAmount");
-		
-		String currency = RequestUtil.getString(request, "currency");
-		String dateTransactionStr = RequestUtil.getString(request, "transactionDate");
-		String status = RequestUtil.getString(request, "status");
-		
-		TransactionModel transaction = new TransactionModel(
-				0, // transactionId will be auto-generated
-				name,
-				description,
-				invoiceNo,
-				payer,
-				payee,
-				categoryId,
-				departmentId,
-				transactionType,
-				paymentMethod,
-				totalAmount,
-				currency,
-				Date.valueOf(dateTransactionStr),
-				status,
-				0, // createdBy (you can set this based on the logged-in user)
-				0  // verifiedBy (you can set this based on the logged-in user)
-		);
-		transaction.setName(name);
-		transaction.setDescription(description);
-		transaction.setInvoiceNo(invoiceNo);
-		transaction.setPayer(payer);
-		transaction.setPayee(payee);
-		transaction.setCategoryId(categoryId);
 		transaction.setDepartmentId(3);
-		transaction.setTransactionType(transactionType);
-		transaction.setPaymentMethod(paymentMethod);
-		transaction.setTotalAmount(totalAmount);
-		transaction.setCurrency(currency);
-		transaction.setDateTransaction(Date.valueOf(dateTransactionStr));
-		transaction.setStatus(status);
-		transaction.setCreatedBy(3); // Set the createdBy field (you can replace 0 with the actual user ID)
-		transaction.setVerifiedBy(4); // Set the verifiedBy field (you can replace 0 with the actual user ID)
+		transaction.setCreatedBy(3);
+		transaction.setVerifiedBy(4);
 		
-
-		// Save the transaction to the database (this is just a placeholder)
+		
+		// Save the transaction and its items to the database (this is just a placeholder)
 		TransactionDAO transactionDAO = new TransactionDAO();
-		transactionDAO.createTransaction(transaction);
+		Integer updatedTransactionId = transactionDAO.createTransaction(transaction);
+		
+		TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
+		transactionItemDAO.upsertAllTransactionItems(items, updatedTransactionId);
+
+		response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
+	} 
+	
+	private void updateTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+		TransactionModel transaction = buildTransaction(request, false);
+		ArrayList<TransactionItemModel> items = buildTransactionItems(request);
+		
+		transaction.setDepartmentId(3);
+		transaction.setCreatedBy(3);
+		transaction.setVerifiedBy(4);
+		
+		
+		// Save the transaction and its items to the database (this is just a placeholder)
+		TransactionDAO transactionDAO = new TransactionDAO();
+		Integer updatedTransactionId = transactionDAO.updateTransaction(transaction);
+		
+		TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
+		transactionItemDAO.upsertAllTransactionItems(items, updatedTransactionId);
 
 		response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
 	} 
 
+	private TransactionModel buildTransaction(HttpServletRequest request, boolean isNewRecord) {
+
+	    TransactionModel transaction = new TransactionModel();
+	    
+	    if (isNewRecord) {
+	    	transaction.setTransactionId(null);
+	    } else {
+	    	transaction.setTransactionId(RequestUtil.getInt(request, "transactionId"));
+	    }
+
+	    transaction.setName(RequestUtil.getString(request, "title"));
+	    transaction.setDescription(RequestUtil.getString(request, "description"));
+	    transaction.setInvoiceNo(RequestUtil.getString(request, "invoiceNo"));
+	    transaction.setPayer(RequestUtil.getString(request, "payer"));
+	    transaction.setPayee(RequestUtil.getString(request, "payee"));
+
+	    transaction.setCategoryId(RequestUtil.getInt(request, "categoryId"));
+	    transaction.setDepartmentId(RequestUtil.getInt(request, "departmentId"));
+
+	    transaction.setTransactionType(
+	        RequestUtil.getString(request, "transactionType"));
+
+	    transaction.setPaymentMethod(
+	        RequestUtil.getString(request, "paymentMethod"));
+
+	    transaction.setTotalAmount(
+	        RequestUtil.getDouble(request, "totalAmount"));
+
+	    transaction.setCurrency(
+	        RequestUtil.getString(request, "currency"));
+
+	    transaction.setDateTransaction(
+	        Date.valueOf(RequestUtil.getString(request, "transactionDate")));
+
+	    transaction.setStatus(
+	        RequestUtil.getString(request, "status"));
+
+	    return transaction;
+	}
+
+	private ArrayList<TransactionItemModel> buildTransactionItems(HttpServletRequest request) {
+	    ArrayList<TransactionItemModel> items = new ArrayList<>();
+
+	    String[] itemIds = request.getParameterValues("itemId");
+	    String[] itemNames = request.getParameterValues("itemName");
+	    String[] itemDescriptions = request.getParameterValues("itemDescription");
+	    String[] itemUnitPrices = request.getParameterValues("itemUnitPrice");
+	    String[] itemQuantities = request.getParameterValues("itemQuantity");
+
+	    if (itemNames != null && itemDescriptions != null && itemUnitPrices != null && itemQuantities != null) {
+	        for (int i = 0; i < itemNames.length; i++) {
+	            TransactionItemModel item = new TransactionItemModel();
+	            item.setTransactionItemId(itemIds != null && itemIds.length > i ? Integer.parseInt(itemIds[i]) : null);
+	            item.setName(itemNames[i]);
+	            item.setDescription(itemDescriptions[i]);
+	            item.setUnitPrice(Double.parseDouble(itemUnitPrices[i]));
+	            item.setQuantity(Integer.parseInt(itemQuantities[i]));
+	            items.add(item);
+	        }
+	    }
+
+	    return items;
+	}
 }
