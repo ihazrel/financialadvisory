@@ -29,7 +29,7 @@ public class RoleDAO {
             while (rs.next()) {
             	RoleModel r = new RoleModel();
                 r.setRoleId(rs.getInt("roleid"));
-                r.setRoleName(rs.getString("rolename"));
+                r.setName(rs.getString("rolename"));
                 //r.setDescription(rs.getString("description"));
                 list.add(r);
             }
