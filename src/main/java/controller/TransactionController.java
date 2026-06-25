@@ -49,27 +49,35 @@ public class TransactionController extends HttpServlet {
 		switch (action) {
 		case "create":
 				// Call the method to create a transaction
-				createTransaction(request, response);
+				createTransaction(request, response, false);
 				break;
 				
 			case "update":
 				// Call the method to update a transaction
-				updateTransaction(request, response);
+				updateTransaction(request, response, false);
 				break;
+				
 			case "delete":
 				// Call the method to delete a transaction
-				//deleteTransaction(request, response);
+				deleteTransaction(request, response);
 				break;
+			
+			case "submit":
+				// Call the method to submit a transaction
+				submitTransaction(request, response);
+				break;	
+				
 			default:
 				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
 		}
 	}
 	
-	private void createTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void createTransaction(HttpServletRequest request, HttpServletResponse response, boolean isSubmit) throws ServletException, IOException {
 		
 		TransactionModel transaction = buildTransaction(request, true);
 		ArrayList<TransactionItemModel> items = buildTransactionItems(request);
 		
+		transaction.setStatus(isSubmit ? "pending" : "draft");
 		transaction.setDepartmentId(3);
 		transaction.setCreatedBy(3);
 		transaction.setVerifiedBy(4);
@@ -85,11 +93,12 @@ public class TransactionController extends HttpServlet {
 		response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
 	} 
 	
-	private void updateTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	private void updateTransaction(HttpServletRequest request, HttpServletResponse response, boolean isSubmit) throws ServletException, IOException {
 
 		TransactionModel transaction = buildTransaction(request, false);
 		ArrayList<TransactionItemModel> items = buildTransactionItems(request);
-		
+
+		transaction.setStatus(isSubmit ? "pending" : "draft");
 		transaction.setDepartmentId(3);
 		transaction.setCreatedBy(3);
 		transaction.setVerifiedBy(4);
@@ -104,6 +113,22 @@ public class TransactionController extends HttpServlet {
 
 		response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
 	} 
+	
+	private void submitTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		updateTransaction(request, response, true);
+	}
+	
+	private void deleteTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	    int transactionId = RequestUtil.getInt(request, "transactionId");
+	    
+	    TransactionDAO transactionDAO = new TransactionDAO();
+	    boolean success = transactionDAO.deleteTransaction(transactionId);
+	    
+	    if (success) {
+	    	response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
+	    }
+	}
 
 	private TransactionModel buildTransaction(HttpServletRequest request, boolean isNewRecord) {
 

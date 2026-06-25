@@ -19,6 +19,8 @@
 	TransactionModel local_transaction = transactionDAO.getTransactionById(id);
 	ArrayList<TransactionItemModel> local_items = transactionItemDAO.getTransactionItemsByTransactionId(id);
 	ArrayList<AttachmentModel> local_attachments = attachmentDAO.getAttachmentsByTransactionId(id);
+	
+	boolean isEditable = isCreate || (local_transaction != null && "draft".equalsIgnoreCase(local_transaction.getStatus()));
 %>
 
 <!DOCTYPE html>
@@ -122,15 +124,18 @@
 						<div class="card-body p-4">
 							<form action="TransactionController" method="post" enctype="multipart/form-data">
 								<input type="hidden" name="transactionId" value="<%= local_transaction != null ? local_transaction.getTransactionId() : null %>">
+								<fieldset <%= isEditable ? "" : "disabled" %>>
 							
 								<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 mb-4 border-bottom">
 									<h5 class="fw-bold mb-0">
 										<i class="bi bi-receipt me-2"></i><%= isCreate ? "Add New Transaction" : "Edit Transaction" %>
 									</h5>
-									<button class="btn btn-outline-primary rounded-pill px-4" type="button"
-										data-bs-toggle="modal" data-bs-target="#extractUploadModal">
-										<i class="bi bi-file-earmark-arrow-up me-2"></i>Extract from PDF
-									</button>
+									<% if (isEditable) { %>
+										<button class="btn btn-outline-primary rounded-pill px-4" type="button"
+											data-bs-toggle="modal" data-bs-target="#extractUploadModal">
+											<i class="bi bi-file-earmark-arrow-up me-2"></i>Extract from PDF
+										</button>
+									<% } %>
 								</div>
 
 								<div class="row g-3 mb-4">
@@ -235,23 +240,39 @@
                                             } else {
 										%>
 											<div class="no-items-message text-center text-muted py-3">
-                                                No items added yet. Click "Add Item" to start.
+                                                No items to show. <%= isEditable ? "Click \"Add Item\" to start." : "" %>
                                             </div>
                                         	<%
                                             }
 										%>
 									</div>
 
-									<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3">
-										<button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" id="addItemBtn">
-											<i class="bi bi-plus-circle me-2"></i>Add Item
-										</button>
-										<div class="d-flex align-items-center gap-3">
-											<span class="fw-bold">Grand Total</span>
-											<input type="number" class="form-control rounded-3 fw-bold text-danger" id="totalAmount" step="0.1"
-												name="totalAmount" value="<%= local_transaction != null ? local_transaction.getTotalAmount() : "" %>" style="max-width: 160px;">
-										</div>
-									</div>
+									<div class="d-flex flex-wrap align-items-center mt-3">
+
+								    <!-- LEFT SIDE (optional button) -->
+								    <div>
+								        <% if (isEditable) { %>
+								            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" id="addItemBtn">
+								                <i class="bi bi-plus-circle me-2"></i>Add Item
+								            </button>
+								        <% } %>
+								    </div>
+								
+								    <!-- RIGHT SIDE (always pushed right) -->
+								    <div class="ms-auto d-flex align-items-center gap-3">
+								
+								        <span class="fw-bold">Grand Total</span>
+								
+								        <input type="number"
+								               class="form-control rounded-3 fw-bold text-danger"
+								               id="totalAmount"
+								               step="0.1"
+								               name="totalAmount"
+								               value="<%= local_transaction != null ? local_transaction.getTotalAmount() : "" %>"
+								               style="max-width: 160px;">
+								    </div>
+								
+								</div>
 								</div>
 
 								<div class="border rounded-3 p-3 mb-4">
@@ -259,10 +280,12 @@
 										<h6 class="fw-bold mb-0">
 											<i class="bi bi-paperclip me-2"></i>Attachment List
 										</h6>
+										<% if (isEditable) { %>
 										<button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
 											data-bs-toggle="modal" data-bs-target="#attachmentUploadModal">
 											<i class="bi bi-upload me-2"></i>Upload Attachment
 										</button>
+										<% } %>
 									</div>
 
 									<div id="attachmentList" class="vstack gap-2">
@@ -284,7 +307,7 @@
                                             } else {
 										%>
 											<div class="no-items-message text-center text-muted py-3">
-                                                No items added yet. Click "Upload Attachment" to start.
+                                                No attachment to show. <%= isEditable ? "Click \"Upload Attachment\" to add." : "" %>
                                             </div>
                                         	<%
                                             }
@@ -293,16 +316,21 @@
 								</div>
 
 								<div class="d-flex flex-wrap justify-content-end gap-2">
+								<% if (isEditable) { %>
 									<a class="btn btn-outline-secondary rounded-pill px-4" href="staff-transaction.jsp">Cancel</a>
-									
-									<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="<%= local_transaction != null ? "update" : "create"%>">
-										<i class="bi bi-send-check me-2"></i>Save
+										
+									<button class="btn <%= (local_transaction != null && "draft".equals(local_transaction.getStatus())) ? "btn-outline-primary" : "btn-primary" %> rounded-pill px-4" type="submit" name="action" value="<%= local_transaction != null ? "update" : "create"%>">
+										<i class="bi bi-floppy2 me-2"></i>Save
 									</button>
 									
-									<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="submit">
-										<i class="bi bi-send-check me-2"></i>Submit Transaction
-									</button>
+									<% if (local_transaction != null && "draft".equals(local_transaction.getStatus())) { %>
+										<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="submit">
+											<i class="bi bi-send-check me-2"></i>Submit Transaction
+										</button>
+									<% } %>
+								<% } %>
 								</div>
+									</fieldset>
 							</form>
 						</div>
 					</section>

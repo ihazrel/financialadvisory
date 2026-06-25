@@ -156,4 +156,24 @@ public class TransactionItemDAO {
 			return false; // Return false if there was an error
 		}
 	}
+
+	public boolean deleteTransactionItemsByTransactionId(Integer transactionId) {
+		try {
+			Connection conn = DBConnection.getConnection();
+			
+			String sql = "DELETE FROM transactionitem WHERE transactionId = ?";
+			
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, transactionId);
+			
+			int rowsAffected = pstmt.executeUpdate();
+			conn.close();
+			
+			return rowsAffected > 0; // Return true if the delete was successful
+			
+		} catch (Exception e) {
+			System.out.println(e);
+			return false; // Return false if there was an error
+		}
+	}
 }

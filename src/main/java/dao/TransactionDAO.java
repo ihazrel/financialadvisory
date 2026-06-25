@@ -185,7 +185,30 @@ public class TransactionDAO {
 		 return null; // Return null if an error occurs
 	}
 	
-	public void deleteTransaction(int transactionId) {
+	public boolean deleteTransaction(Integer transactionId) {
 		// Code to delete a transaction from the database by its ID
+		
+		try {
+				Connection conn = DBConnection.getConnection();
+				
+				TransactionModel existingTransaction = getTransactionById(transactionId);
+				
+				if (existingTransaction == null) {
+					return false; // Transaction does not exist
+				}
+				
+				TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
+				transactionItemDAO.deleteTransactionItemsByTransactionId(transactionId);
+
+				String sql = "DELETE FROM transaction WHERE transactionId=?";
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setInt(1, transactionId);
+				pstmt.executeUpdate();
+				return true; // Return true to indicate successful deletion
+				
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+		return false; // Return false if an error occurs
 	}
 }

@@ -187,30 +187,37 @@
 									<tbody>
 										<%
 										TransactionDAO transactionDOA = new TransactionDAO();
-																			ArrayList<TransactionModel> transactions = transactionDOA.getAllTransactions(); // Fetch transactions from database
+										ArrayList<TransactionModel> transactions = transactionDOA.getAllTransactions(); // Fetch transactions from database
 																		
-																			for (TransactionModel transaction : transactions) {
+										for (TransactionModel transaction : transactions) {
 										%>
-										<tr>
-											<td><%= transaction.getDateTransaction() %></td>
-											<td><%= transaction.getName() %></td>
-											<td><span class="badge rounded-pill text-bg-success">Income</span></td>
-											<td><%= transaction.getCategoryId() %></td>
-											<td><%= transaction.getPaymentMethod() %></td>
-											<td class="text-end text-success fw-bold">RM <%= transaction.getTotalAmount() %></td>
-											<%if ("Approved".equalsIgnoreCase(transaction.getStatus())) { %>
-											<td><span class="badge rounded-pill text-bg-success">Approved</span></td>
-											<% } else if ("Rejected".equalsIgnoreCase(transaction.getStatus())) { %>
-											<td><span class="badge rounded-pill text-bg-danger">Rejected</span></td>
-											<% } else { %>
-											<td><span class="badge rounded-pill text-bg-warning">Pending Verification</span></td>
-											<% } %>
-											<td class="text-center">
-												<a class="btn btn-sm btn-outline-secondary rounded-pill" href="staff-transaction-details.jsp?id=<%= transaction.getTransactionId() %>"><i class="bi bi-eye"></i></a>
-												<a href="staff-transaction-details.jsp?action=edit&id=<%= transaction.getTransactionId() %>" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-pencil-square"></i></a>
-												<a href="#" class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-trash"></i></a>
-											</td>
-										</tr>
+											<tr>
+												<td><%= transaction.getDateTransaction() %></td>
+												<td><%= transaction.getName() %></td>
+												<td><%= transaction.getTransactionType() %></td>
+												<td><%= transaction.getCategoryId() %></td>
+												<td><%= transaction.getPaymentMethod() %></td>
+												<td class="text-end text-success fw-bold">RM <%= transaction.getTotalAmount() %></td>
+												
+												<%if ("Approved".equalsIgnoreCase(transaction.getStatus())) { %>
+													<td><span class="badge rounded-pill text-bg-success">Approved</span></td>
+													<% } else if ("Rejected".equalsIgnoreCase(transaction.getStatus())) { %>
+													<td><span class="badge rounded-pill text-bg-danger">Rejected</span></td>
+													<% } else if ("Pending".equalsIgnoreCase(transaction.getStatus())) { %>
+													<td><span class="badge rounded-pill text-bg-warning">Pending Verification</span></td>
+													<% } else { %>
+													<td><span class="badge rounded-pill text-bg-secondary">Draft</span></td>
+													<% } %>
+													
+												<td class="text-center">
+													<a class="btn btn-sm btn-outline-primary rounded-pill" href="staff-transaction-details.jsp?id=<%= transaction.getTransactionId() %>"><i class="bi bi-eye"></i></a>
+													<form action="TransactionController" method="post" style="display:inline;">
+														<input type="hidden" name="action" value="delete">
+														<input type="hidden" name="transactionId" value="<%= transaction.getTransactionId() %>">
+														<a href="#" class="btn btn-sm btn-outline-danger rounded-pill" onclick="if(confirm('Are you sure you want to delete this transaction?')) { this.closest('form').submit(); } return false;" name="action" value="delete"><i class="bi bi-trash"></i></a>
+													</form>
+												</td>
+											</tr>
 										<%
 											}
 										%>
