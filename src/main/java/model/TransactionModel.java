@@ -11,7 +11,9 @@ public class TransactionModel {
     private String payer;
     private String payee;
     private Integer categoryId;
+    private String categoryName; // New field for category name
     private Integer departmentId;
+    private String departmentName; // New field for department name
     private String transactionType;
     private String paymentMethod;
     private double totalAmount;
@@ -19,7 +21,9 @@ public class TransactionModel {
     private Date dateTransaction;
     private String status;
     private Integer createdBy;
+    private String createdByName; // New field for created by name
     private Integer verifiedBy;
+    private String verifiedByName; // New field for verified by name
 
     public TransactionModel() {}
 
@@ -30,7 +34,9 @@ public class TransactionModel {
                             String payer,
                             String payee,
                             Integer categoryId,
+                            String categoryName,
                             Integer departmentId,
+                            String departmentName,
                             String transactionType,
                             String paymentMethod,
                             double totalAmount,
@@ -38,7 +44,9 @@ public class TransactionModel {
                             Date dateTransaction,
                             String status,
                             Integer createdBy,
-                            Integer verifiedBy) {
+                            String createdByName,
+                            Integer verifiedBy,
+                            String verifiedByName) {
 
         this.transactionId = transactionId;
         this.name = name;
@@ -47,7 +55,9 @@ public class TransactionModel {
         this.payer = payer;
         this.payee = payee;
         this.categoryId = categoryId;
+        this.categoryName = categoryName;
         this.departmentId = departmentId;
+        this.departmentName = departmentName;
         this.transactionType = transactionType;
         this.paymentMethod = paymentMethod;
         this.totalAmount = totalAmount;
@@ -55,7 +65,9 @@ public class TransactionModel {
         this.dateTransaction = dateTransaction;
         this.status = status;
         this.createdBy = createdBy;
+        this.createdByName = createdByName;
         this.verifiedBy = verifiedBy;
+        this.verifiedByName = verifiedByName;
     }
 
     public Integer getTransactionId() {
@@ -113,6 +125,14 @@ public class TransactionModel {
     public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
     }
+    
+    public String getCategoryName() {
+		return categoryName;
+	}
+    
+    public void setCategoryName(String categoryName) {
+    	this.categoryName = categoryName;
+    }
 
     public Integer getDepartmentId() {
         return departmentId;
@@ -120,6 +140,14 @@ public class TransactionModel {
 
     public void setDepartmentId(Integer departmentId) {
         this.departmentId = departmentId;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 
     public String getTransactionType() {
@@ -177,6 +205,14 @@ public class TransactionModel {
     public void setCreatedBy(Integer createdBy) {
         this.createdBy = createdBy;
     }
+    
+    public String getCreatedByName() {
+    	return createdByName;
+    }
+    
+    public void setCreatedByName(String createdByName) {
+		this.createdByName = createdByName;
+	}
 
     public Integer getVerifiedBy() {
         return verifiedBy;
@@ -185,4 +221,12 @@ public class TransactionModel {
     public void setVerifiedBy(Integer verifiedBy) {
         this.verifiedBy = verifiedBy;
     }
+    
+    public String getVerifiedByName() {
+		return verifiedByName;
+	}
+    
+    public void setVerifiedByName(String verifiedByName) {
+		this.verifiedByName = verifiedByName;
+	}
 }

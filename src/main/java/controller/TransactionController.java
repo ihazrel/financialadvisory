@@ -6,7 +6,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.TransactionModel;
+import model.UserModel;
+import model.CategoryModel;
 import model.TransactionItemModel;
 import util.RequestUtil;
 
@@ -14,7 +17,9 @@ import util.RequestUtil;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.List;
 
+import dao.CategoryDAO;
 import dao.TransactionDAO;
 import dao.TransactionItemDAO;
 
@@ -33,6 +38,32 @@ public class TransactionController extends HttpServlet {
         super();
         // TODO Auto-generated constructor stub
     }
+    
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// Handle GET requests if needed
+    	
+    	String action = request.getParameter("action");
+    	
+    	if (action == null || action.isEmpty()) {
+    		response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action parameter is missing");
+    		return;
+    	}
+    	
+    	switch (action) {
+    		case "list":
+				// Call the method to list transactions
+				listTransactions(request, response);
+				break;
+				
+    		case "view-details":
+    			// Call the method to view transaction details
+    			viewTransactionDetails(request, response);
+    			break;
+    			
+			default:
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+    	}
+    }
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
@@ -47,40 +78,34 @@ public class TransactionController extends HttpServlet {
 		}
 		
 		switch (action) {
-		case "create":
-				// Call the method to create a transaction
-				createTransaction(request, response, false);
-				break;
+			case "create" -> createTransaction(request, response, false);
 				
-			case "update":
-				// Call the method to update a transaction
-				updateTransaction(request, response, false);
-				break;
+			case "update" -> updateTransaction(request, response, false);
 				
-			case "delete":
-				// Call the method to delete a transaction
-				deleteTransaction(request, response);
-				break;
+			case "delete" -> deleteTransaction(request, response);
+				
+			case "submit" -> submitTransaction(request, response);
 			
-			case "submit":
-				// Call the method to submit a transaction
-				submitTransaction(request, response);
-				break;	
+			case "approve" -> confirmApproval(request, response, true);
+			
+			case "reject" -> confirmApproval(request, response, false);
 				
-			default:
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+			default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
 		}
 	}
 	
 	private void createTransaction(HttpServletRequest request, HttpServletResponse response, boolean isSubmit) throws ServletException, IOException {
 		
+		HttpSession session = request.getSession();
+		UserModel curr_user = (UserModel) session.getAttribute("user");
+		
 		TransactionModel transaction = buildTransaction(request, true);
 		ArrayList<TransactionItemModel> items = buildTransactionItems(request);
 		
+		
 		transaction.setStatus(isSubmit ? "pending" : "draft");
-		transaction.setDepartmentId(3);
-		transaction.setCreatedBy(3);
-		transaction.setVerifiedBy(4);
+		transaction.setDepartmentId(curr_user.getDepartmentId());
+		transaction.setCreatedBy(curr_user.getUserId());
 		
 		
 		// Save the transaction and its items to the database (this is just a placeholder)
@@ -90,19 +115,20 @@ public class TransactionController extends HttpServlet {
 		TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
 		transactionItemDAO.upsertAllTransactionItems(items, updatedTransactionId);
 
-		response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
+		listTransactions(request, response);	
 	} 
 	
 	private void updateTransaction(HttpServletRequest request, HttpServletResponse response, boolean isSubmit) throws ServletException, IOException {
 
+		HttpSession session = request.getSession();
+		UserModel curr_user = (UserModel) session.getAttribute("user");
+		
 		TransactionModel transaction = buildTransaction(request, false);
 		ArrayList<TransactionItemModel> items = buildTransactionItems(request);
 
 		transaction.setStatus(isSubmit ? "pending" : "draft");
-		transaction.setDepartmentId(3);
-		transaction.setCreatedBy(3);
-		transaction.setVerifiedBy(4);
-		
+		transaction.setDepartmentId(curr_user.getDepartmentId());
+		transaction.setCreatedBy(curr_user.getUserId());
 		
 		// Save the transaction and its items to the database (this is just a placeholder)
 		TransactionDAO transactionDAO = new TransactionDAO();
@@ -111,13 +137,8 @@ public class TransactionController extends HttpServlet {
 		TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
 		transactionItemDAO.upsertAllTransactionItems(items, updatedTransactionId);
 
-		response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
+		listTransactions(request, response);
 	} 
-	
-	private void submitTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		updateTransaction(request, response, true);
-	}
 	
 	private void deleteTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	    int transactionId = RequestUtil.getInt(request, "transactionId");
@@ -127,6 +148,65 @@ public class TransactionController extends HttpServlet {
 	    
 	    if (success) {
 	    	response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
+	    }
+	}
+
+	private void submitTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		updateTransaction(request, response, true);
+	}
+
+	private void confirmApproval(HttpServletRequest request, HttpServletResponse response, boolean isApproved) throws ServletException, IOException {
+	    int transactionId = RequestUtil.getInt(request, "transactionId");
+	    
+	    TransactionDAO transactionDAO = new TransactionDAO();
+	    TransactionModel transaction = transactionDAO.getTransactionById(transactionId);
+	    
+	    if (transaction != null && "pending".equals(transaction.getStatus())) {
+	    	
+	        transaction.setStatus(isApproved ? "approved" : "rejected");
+	        transaction.setVerifiedBy(((UserModel) request.getSession().getAttribute("user")).getUserId());
+	        
+	        boolean success = transactionDAO.updateTransaction(transaction) != null;
+	        
+	        if (success) {
+	        	listTransactions(request, response); // Redirect to a success page after approval
+	        }
+	    } else {
+	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Transaction not found or not in pending status");
+	    }
+	}
+	
+	private void listTransactions(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// Implementation for listing transactions
+		
+		TransactionDAO transactionDAO = new TransactionDAO();
+		
+		ArrayList<TransactionModel> transactions = transactionDAO.getAllTransactions();
+		
+		request.setAttribute("transactions_list", transactions);
+		
+		request.getRequestDispatcher("staff-transaction.jsp").forward(request, response);
+	}	
+	
+	private void viewTransactionDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	    int transactionId = RequestUtil.getInt(request, "transactionId");
+	    
+	    TransactionDAO transactionDAO = new TransactionDAO();
+	    TransactionModel transaction = transactionDAO.getTransactionById(transactionId);
+	    List<CategoryModel> categories = new CategoryDAO().getAllCategories();
+	    
+	    if (transaction != null) {
+	        TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
+	        List<TransactionItemModel> items = transactionItemDAO.getTransactionItemsByTransactionId(transactionId);
+	        
+	        request.setAttribute("transaction", transaction);
+	        request.setAttribute("transaction_items", items);
+	        request.setAttribute("categories_dropdown", categories);
+	        
+	        request.getRequestDispatcher("staff-transaction-details.jsp").forward(request, response);
+	    } else {
+	        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Transaction not found");
 	    }
 	}
 

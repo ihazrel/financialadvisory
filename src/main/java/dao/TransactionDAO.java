@@ -17,17 +17,49 @@ public class TransactionDAO {
 			Connection conn = DBConnection.getConnection();
 			Statement stmt = conn.createStatement();
 			
-			ResultSet rs = stmt.executeQuery("SELECT * FROM transaction WHERE transactionId = " + transactionId);
+			ResultSet rs = stmt.executeQuery("SELECT\r\n"
+					+ "    transactionid AS transactionId,\r\n"
+					+ "    transaction.name AS transactionName,\r\n"
+					+ "    transaction.description AS transactionDescription,\r\n"
+					+ "    invoiceno AS invoiceNO,\r\n"
+					+ "    payer AS payer,\r\n"
+					+ "    payee AS payee,\r\n"
+					+ "    transaction.categoryId AS categoryId,\r\n"
+					+ "    c.name AS categoryName,\r\n"
+					+ "    transaction.departmentId AS departmentId,\r\n"
+					+ "    d.name AS departmentName,\r\n"
+					+ "    transactionType AS transactionType,\r\n"
+					+ "    paymentMethod AS paymentMethod,\r\n"
+					+ "    totalAmount AS totalAmount,\r\n"
+					+ "    currency AS currency,\r\n"
+					+ "    dateTransaction AS dateTransaction,\r\n"
+					+ "    createdBy AS createdBy,\r\n"
+					+ "    created.name AS createdName,\r\n"
+					+ "    verifiedBy AS verifiedBy,\r\n"
+					+ "    verified.name AS verifiedName,\r\n"
+					+ "    status AS status\r\n"
+					+ "FROM transaction\r\n"
+					+ "LEFT JOIN category c\r\n"
+					+ "    ON transaction.categoryid = c.categoryid\r\n"
+					+ "LEFT JOIN department d\r\n"
+					+ "    ON transaction.departmentid = d.departmentid\r\n"
+					+ "LEFT JOIN users created\r\n"
+					+ "    ON transaction.createdby = created.userid\r\n"
+					+ "LEFT JOIN users verified\r\n"
+					+ "    ON transaction.verifiedby = verified.userid\r\n"
+					+ "WHERE transactionId = " + transactionId);
 			
 			while (rs.next()) {
 				TransactionModel transaction = new TransactionModel(rs.getInt("transactionId"),
-						rs.getString("name"),
-						rs.getString("description"),
-						rs.getString("invoiceNo"),
+						rs.getString("transactionName"),
+						rs.getString("transactionDescription"),
+						rs.getString("invoiceNO"),
 						rs.getString("payer"),
 						rs.getString("payee"),
 						rs.getInt("categoryId"),
+						rs.getString("categoryName"),
 						rs.getInt("departmentId"),
+						rs.getString("departmentName"),
 						rs.getString("transactionType"),
 						rs.getString("paymentMethod"),
 						rs.getDouble("totalAmount"),
@@ -35,7 +67,9 @@ public class TransactionDAO {
 						rs.getDate("dateTransaction"),
 						rs.getString("status"),
 						rs.getInt("createdBy"),
-						rs.getInt("verifiedBy"));
+						rs.getString("createdName"),
+						rs.getInt("verifiedBy"),
+						rs.getString("verifiedName"));
 				
 				return transaction; // Return the transaction object
 
@@ -54,19 +88,53 @@ public class TransactionDAO {
 			Connection conn = DBConnection.getConnection();
 			Statement stmt = conn.createStatement();
 			
-			ResultSet rs = stmt.executeQuery("SELECT * FROM transaction");
+			ResultSet rs = stmt.executeQuery("""
+					SELECT
+					    transactionid AS transactionId,
+					    transaction.name AS transactionName,
+					    transaction.description AS transactionDescription,
+					    invoiceno AS invoiceNO,
+					    payer AS payer,
+					    payee AS payee,
+					    transaction.categoryId AS categoryId,
+					    c.name AS categoryName,
+					    transaction.departmentId AS departmentId,
+					    d.name AS departmentName,
+					    transactionType AS transactionType,
+					    paymentMethod AS paymentMethod,
+					    totalAmount AS totalAmount,
+					    currency AS currency,
+					    dateTransaction AS dateTransaction,
+					    createdBy AS createdBy,
+					    created.name AS createdName,
+					    verifiedBy AS verifiedBy,
+					    verified.name AS verifiedName,
+					    status AS status
+					FROM transaction
+					LEFT JOIN category c
+					    ON transaction.categoryid = c.categoryid
+					LEFT JOIN department d
+					    ON transaction.departmentid = d.departmentid
+					LEFT JOIN users created
+					    ON transaction.createdby = created.userid
+					LEFT JOIN users verified
+					    ON transaction.verifiedby = verified.userid
+					ORDER BY dateTransaction DESC
+					""");
 			
 			ArrayList<TransactionModel> transactions = new ArrayList<>();
 			
 			while (rs.next()) {
 				TransactionModel transaction = new TransactionModel(rs.getInt("transactionId"),
-						rs.getString("name"),
-						rs.getString("description"),
-						rs.getString("invoiceNo"),
+						rs.getString("transactionName"),
+						rs.getString("transactionDescription"),
+						rs.getString("invoiceNO"),
 						rs.getString("payer"),
 						rs.getString("payee"),
 						rs.getInt("categoryId"),
+						rs.getString("CategoryName"),
 						rs.getInt("departmentId"),
+						rs.getString("DepartmentName"),
 						rs.getString("transactionType"),
 						rs.getString("paymentMethod"),
 						rs.getDouble("totalAmount"),
@@ -74,7 +142,9 @@ public class TransactionDAO {
 						rs.getDate("dateTransaction"),
 						rs.getString("status"),
 						rs.getInt("createdBy"),
-						rs.getInt("verifiedBy"));
+						rs.getString("createdName"),
+						rs.getInt("verifiedBy"),
+						rs.getString("verifiedName"));
 				
 				transactions.add(transaction);
 			}
@@ -211,4 +281,4 @@ public class TransactionDAO {
 			}
 		return false; // Return false if an error occurs
 	}
-}
+	}

@@ -3,7 +3,9 @@
 <%@ page import="model.TransactionItemModel, dao.TransactionItemDAO" %>
 <%@ page import="model.AttachmentModel, dao.AttachmentDAO" %>
 <%@ page import="dao.CategoryDAO, model.CategoryModel" %>
-<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.List" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%
 	TransactionDAO transactionDAO = new TransactionDAO();
@@ -16,11 +18,11 @@
 	
 	int id = request.getParameter("id") != null ? Integer.parseInt(request.getParameter("id")) : -1;
 	
-	TransactionModel local_transaction = transactionDAO.getTransactionById(id);
-	ArrayList<TransactionItemModel> local_items = transactionItemDAO.getTransactionItemsByTransactionId(id);
-	ArrayList<AttachmentModel> local_attachments = attachmentDAO.getAttachmentsByTransactionId(id);
+	TransactionModel local_transaction = (TransactionModel) request.getAttribute("transaction");
+	List<TransactionItemModel> local_items = (List<TransactionItemModel>) request.getAttribute("transaction_items");
+	List<AttachmentModel> local_attachments = (List<AttachmentModel>) request.getAttribute("transaction_attachments");
 	
-	boolean isEditable = isCreate || (local_transaction != null && "draft".equalsIgnoreCase(local_transaction.getStatus()));
+	boolean isEditable = local_transaction == null || (local_transaction != null && "draft".equalsIgnoreCase(local_transaction.getStatus()));
 %>
 
 <!DOCTYPE html>
@@ -93,7 +95,7 @@
 						<i class="bi bi-speedometer2 me-2"></i> Dashboard
 					</a>
 					<a class="nav-link active text-white rounded-3"
-						style="background-color: #084298;" href="staff-transaction.jsp">
+						style="background-color: #084298;" href="TransactionController?action=list">
 						<i class="bi bi-cash-coin me-2"></i> Transactions
 					</a>
 					<a class="nav-link text-white rounded-3" href="aiadvisory.jsp?role=staff">
@@ -115,7 +117,7 @@
 							<h1 class="fw-bold mb-1"><%= isCreate ? "Add New Transaction" : "Transaction Details" %></h1>
 							<p class="text-secondary mb-0">Record transaction information, item lines, and supporting attachments.</p>
 						</div>
-						<a class="btn btn-outline-secondary rounded-pill px-4" href="staff-transaction.jsp">
+						<a class="btn btn-outline-secondary rounded-pill px-4" href="TransactionController?action=list">
 							<i class="bi bi-arrow-left me-2"></i>Back to List
 						</a>
 					</div>
@@ -123,7 +125,7 @@
 					<section class="card border-0 shadow-sm transaction-form-card">
 						<div class="card-body p-4">
 							<form action="TransactionController" method="post" enctype="multipart/form-data">
-								<input type="hidden" name="transactionId" value="<%= local_transaction != null ? local_transaction.getTransactionId() : null %>">
+								<input type="hidden" name="transactionId" value="${transaction != null ? transaction.getTransactionId() : null}">
 								<fieldset <%= isEditable ? "" : "disabled" %>>
 							
 								<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 mb-4 border-bottom">
@@ -140,63 +142,63 @@
 
 								<div class="row g-3 mb-4">
 									<div class="col-md-6">
-										<label class="form-label">Transaction Title</label>
-										<input type="text" class="form-control rounded-3" name="title"
-											value="<%= local_transaction != null ? local_transaction.getName() : "" %>" placeholder="Example: Office Rent">
+										<label class="form-label">
+											Transaction Title <span class="text-danger">*</span>
+										</label> 
+										<input type="text" class="form-control rounded-3" name="title" required
+											value="${transaction != null ? transaction.name : ''}" placeholder="Example: Office Rent">
 									</div>
 									<div class="col-md-3">
 										<label class="form-label">Type</label>
 										<select class="form-select rounded-3" name="transactionType">
-											<option value="income" <%= (local_transaction != null && "income".equalsIgnoreCase(local_transaction.getTransactionType())) ? "selected" : "" %>>Income</option>
-											<option value="expense" <%= (local_transaction != null && "expense".equalsIgnoreCase(local_transaction.getTransactionType())) ? "selected" : "" %>>Expense</option>
+											<option value="income" <c:if test="${transaction != null && fn:toLowerCase(transaction.transactionType) eq 'income'}">selected</c:if>>Income</option>
+											<option value="expense" <c:if test="${transaction != null && fn:toLowerCase(transaction.transactionType) eq 'expense'}">selected</c:if>>Expense</option>
 										</select>
 									</div>
 									<div class="col-md-3">
-										<label class="form-label">Category</label>
-										<select class="form-select rounded-3" name="categoryId">
+										<label class="form-label">
+											Category <span class="text-danger">*</span>
+										</label>
+										<select class="form-select rounded-3" name="categoryId" required>
 												<option value="">Select Category</option>
-	                                        <%
-	                                        	CategoryDAO categoryDAO = new CategoryDAO();
-	                                        	ArrayList<CategoryModel> categories = categoryDAO.getAllCategories();
-	                                        	for (CategoryModel category : categories) {
-	                                        %>
-	                                        	<option value="<%= category.getCategoryId() %>" <%= (local_transaction != null && local_transaction.getCategoryId() == category.getCategoryId()) ? "selected" : "" %>>
-	                                        		<%= category.getName() %>
-	                                        	</option>
-	                                        <%
-	                                        	}
-	                                        %>
+												<c:forEach var="category" items="${categories_dropdown}">
+													<option value="${category.categoryId}" ${transaction != null && transaction.categoryId == category.categoryId ? 'selected' : ''}>
+	                                        			${category.name}
+	                                        		</option>
+												</c:forEach>
 										</select>
 									</div>
 									<div class="col-md-4">
 										<label class="form-label">Amount (RM)</label>
 										<input type="number" step="0.01" class="form-control rounded-3"
-											name="amount" value="<%= local_transaction != null ? local_transaction.getTotalAmount() : "" %>" placeholder="0.00">
+											name="amount" value="${transaction != null ? transaction.totalAmount : ''}" placeholder="0.00">
 									</div>
 									<div class="col-md-4">
-										<label class="form-label">Transaction Date</label>
-										<input type="date" class="form-control rounded-3"
-											name="transactionDate" value="<%= local_transaction != null ? local_transaction.getDateTransaction() : "" %>" placeholder="Select transaction date">
+										<label class="form-label">
+											Transaction Date <span class="text-danger">*</span>
+										</label>
+										<input type="date" class="form-control rounded-3" required
+											name="transactionDate" value="${transaction != null ? transaction.dateTransaction : ''}" placeholder="Select transaction date">
 									</div>
 									<div class="col-md-4">
 										<label class="form-label">Payment Method</label>
 										<input type="text" class="form-control rounded-3"
-											name="paymentMethod" value="<%= local_transaction != null ? local_transaction.getPaymentMethod() : "" %>" placeholder="e.g. Bank Transfer, Credit Card, Cash">
+											name="paymentMethod" value="${transaction != null ? transaction.paymentMethod : ''}" placeholder="e.g. Bank Transfer, Credit Card, Cash">
 									</div>
 									<div class="col-md-6">
 										<label class="form-label">Invoice / Reference Number</label>
 										<input type="text" class="form-control rounded-3" name="invoiceNo"
-											value="<%= local_transaction != null ? local_transaction.getInvoiceNo() : "" %>" placeholder="Invoice or payment reference">
+											value="${transaction != null ? transaction.invoiceNo : ''}" placeholder="Invoice or payment reference">
 									</div>
 									<div class="col-md-6">
 										<label class="form-label">Vendor / Payee Name</label>
 										<input type="text" class="form-control rounded-3" name="payee"
-											value="<%= local_transaction != null ? local_transaction.getPayee() : "" %>" placeholder="Vendor, customer, or payee">
+											value="${transaction != null ? transaction.payee : ''}" placeholder="Vendor, customer, or payee">
 									</div>
 									<div class="col-12">
 										<label class="form-label">Reason / Description</label>
 										<textarea class="form-control rounded-3" rows="4" name="description"
-											placeholder="Explain transaction purpose"><%= local_transaction != null ? local_transaction.getDescription() : "" %></textarea>
+											placeholder="Explain transaction purpose">${transaction != null ? transaction.description : ''}</textarea>
 									</div>
 								</div>
 
@@ -220,31 +222,25 @@
 									</div>
 
 									<div id="lineItems" class="vstack gap-2">
-										<%
-											if (local_items != null && !local_items.isEmpty()) {
-                                                for (TransactionItemModel item : local_items) {
-										%>
-											<div class="line-item-grid line-item-row">
-												<input type="hidden" name="itemId" value="<%= item.getTransactionItemId() %>">
-												<input type="text" class="form-control rounded-3" name="itemName" value="<%= item.getName() %>">
-												<input type="text" class="form-control rounded-3" name="itemDescription" value="<%= item.getDescription() %>">
-												<input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="<%= item.getQuantity() %>" min="0" step="1">
-												<input type="number" class="form-control rounded-3 item-price" name="itemUnitPrice" value="<%= item.getUnitPrice() %>" min="0" step="0.01">
-												<input type="number" class="form-control rounded-3 item-total fw-bold" name="itemTotal" value="<%= item.getQuantity() * item.getUnitPrice() %>" min="0" step="0.01">
-												<button type="button" class="btn btn-outline-danger rounded-circle remove-row" aria-label="Delete item">
-													<i class="bi bi-trash"></i>
-												</button>
-											</div>
-											<%
-                                                }
-                                            } else {
-										%>
-											<div class="no-items-message text-center text-muted py-3">
+										<c:forEach var="item" items="${transaction_items}">
+                                            <div class="line-item-grid line-item-row">
+                                                <input type="hidden" name="itemId" value="${item.transactionItemId}">
+                                                <input type="text" class="form-control rounded-3" name="itemName" value="${item.name != null ? item.name : ''}">
+                                                <input type="text" class="form-control rounded-3" name="itemDescription" value="${item.description != null ? item.description : ''}">
+                                                <input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="${item.quantity}" min="0" step="1">
+                                                <input type="number" class="form-control rounded-3 item-price" name="itemUnitPrice" value="${item.unitPrice}" min="0" step="0.01">
+                                                <input type="number" class="form-control rounded-3 item-total fw-bold" name="itemTotal" value="${item.quantity * item.unitPrice}" min="0" step="0.01">
+                                                <button type="button" class="btn btn-outline-danger rounded-circle remove-row" aria-label="Delete item">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+										</c:forEach>
+										
+										<c:if test="${transaction_items == null || transaction_items.isEmpty()}">
+                                            <div class="no-items-message text-center text-muted py-3" id="noItemsMessage">
                                                 No items to show. <%= isEditable ? "Click \"Add Item\" to start." : "" %>
                                             </div>
-                                        	<%
-                                            }
-										%>
+										</c:if>
 									</div>
 
 									<div class="d-flex flex-wrap align-items-center mt-3">
@@ -317,20 +313,30 @@
 
 								<div class="d-flex flex-wrap justify-content-end gap-2">
 								<% if (isEditable) { %>
-									<a class="btn btn-outline-secondary rounded-pill px-4" href="staff-transaction.jsp">Cancel</a>
+									<a class="btn btn-outline-secondary rounded-pill px-4" href="TransactionController?action=list">Cancel</a>
 										
-									<button class="btn <%= (local_transaction != null && "draft".equals(local_transaction.getStatus())) ? "btn-outline-primary" : "btn-primary" %> rounded-pill px-4" type="submit" name="action" value="<%= local_transaction != null ? "update" : "create"%>">
+									<button class="btn <c:if test="${transaction != null}">btn-outline-primary</c:if><c:if test="${transaction == null}">btn-primary</c:if> rounded-pill px-4" type="submit" name="action" value="<%= local_transaction != null ? "update" : "create"%>">
 										<i class="bi bi-floppy2 me-2"></i>Save
 									</button>
 									
-									<% if (local_transaction != null && "draft".equals(local_transaction.getStatus())) { %>
-										<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="submit">
-											<i class="bi bi-send-check me-2"></i>Submit Transaction
-										</button>
-									<% } %>
+									<c:if test="${transaction != null && transaction.status == 'draft'}">
+                                        <button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="submit">
+                                            <i class="bi bi-send-check me-2"></i>Submit Transaction
+                                    	</button>
+									</c:if>
 								<% } %>
 								</div>
 									</fieldset>
+								<div class="d-flex flex-wrap justify-content-end gap-2">
+								<c:if test="${transaction != null && transaction.status == 'pending'}">
+                                    <button class="btn btn-danger rounded-pill px-4" type="submit" name="action" value="reject">
+										<i class="bi bi-x-circle me-3"></i>Reject
+									</button>
+									<button class="btn btn-success rounded-pill px-4" type="submit" name="action" value="approve">
+										<i class="bi bi-check2-circle me-3"></i>Approve
+									</button>
+								</c:if>
+								</div>
 							</form>
 						</div>
 					</section>

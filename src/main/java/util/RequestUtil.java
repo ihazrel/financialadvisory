@@ -6,7 +6,7 @@ public class RequestUtil {
 
     public static String getString(HttpServletRequest request, String key) {
         String value = request.getParameter(key);
-        return (value == null || value.trim().isEmpty()) ? null : value.trim();
+        return (value == null || value.trim().isEmpty()) ? "" : value.trim();
     }
 
     public static Integer getInt(HttpServletRequest request, String key) {

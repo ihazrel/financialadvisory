@@ -96,7 +96,7 @@
 					</a>
 
 					<% if (roleId == 1) { %>
-					<a class="nav-link text-white rounded-3" href="staff-transaction.jsp">
+					<a class="nav-link text-white rounded-3" href="TransactionController?action=list">
 						<i class="bi bi-cash-coin me-2"></i> Transactions
 					</a>
 					<% } %>
