@@ -5,6 +5,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<<<<<<< HEAD
+<jsp:include page="/includes/common-head.jsp" />
+=======
 <meta charset="UTF-8">
 <title>AI Financial Advisory System</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,11 +17,25 @@
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="css/chatbot-widget.css?v=2">
+>>>>>>> main
 </head>
 
 <body class="bg-light">
 	<div class="container-fluid">
 		<div class="row min-vh-100">
+<<<<<<< HEAD
+			<jsp:include page="/includes/sidebar.jsp">
+				<jsp:param name="sidebarRole" value="financialmanager" />
+				<jsp:param name="activeMenu" value="" />
+			</jsp:include>
+
+			<main class="col-12 col-lg-10 p-4">
+				<jsp:include page="/includes/page-header.jsp">
+					<jsp:param name="pageTitle" value="Generate Company Statement" />
+					<jsp:param name="pageSubtitle" value="Generate summary statement for company revenue, expenses, and net profit." />
+					<jsp:param name="pageRoleName" value="Financial Manager" />
+				</jsp:include>
+=======
 			<aside class="col-12 col-lg-2 text-white p-4"
 				style="background-color: #0F766E;">
 				<h4 class="fw-bold mb-4">
@@ -59,6 +76,7 @@
 						</div>
 					</div>
 				</div>
+>>>>>>> main
 
 				<!-- Statement Filter -->
 				<section class="card border-0 shadow-sm rounded-4 mb-4">
@@ -306,6 +324,9 @@
 			</main>
 		</div>
 	</div>
+<<<<<<< HEAD
+<jsp:include page="/includes/common-scripts.jsp" />
+=======
 
 	<jsp:include page="notification-widget.jsp" />
 
@@ -313,5 +334,6 @@
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="js/chatbot-widget.js?v=2"></script>
+>>>>>>> main
 </body>
 </html>

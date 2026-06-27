@@ -1,3 +1,4 @@
+<%-- Frontend demo mode: authentication and session checks are intentionally disabled. --%>
 <%-- this is for breaking the session --%>
 
 <%@ page import="model.UserModel" %>
