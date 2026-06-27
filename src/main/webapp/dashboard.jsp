@@ -11,7 +11,9 @@
 	
 	int roleId = user.getRoleId();
 	String name = user.getName();
+%>
 
+<%
 	String roleName = "";
 	String sidebarTitle = "";
 	String sidebarIcon = "";
@@ -22,40 +24,49 @@
 	String subtitle = "";
 	String role = "";
 	
-	if (roleId == 1) {
 
-		roleName = "Staff";
-		sidebarTitle = "Financial Advisory";
-		sidebarIcon = "bi-wallet2";
-		sidebarColor = "#0D6EFD";
-		activeStyle = "background-color: #084298;";
-		settingsHref = "account-settings.jsp?role=staff";
-		advisoryHref = "aiadvisory.jsp?role=staff";
-		subtitle = "View dashboard, manage transactions, and initiate AI advisory.";
-	
-	}else if (roleId == 3) {
-		
-		roleName = "Department Manager";
-		sidebarTitle = "Department Manager";
-		sidebarIcon = "bi-person-badge";
-		sidebarColor = "#4338CA";
-		activeStyle = "background-color: #312E81;";
-		settingsHref = "account-settings.jsp?role=departmentmanager";
-		advisoryHref = "aiadvisory.jsp?role=departmentmanager";
-		subtitle = "Review department transactions, monitor budget usage, and view department analytics.";
-		
-	} else if (roleId == 2) {
-		
-		roleName = "Financial Manager";
-		sidebarTitle = "Financial Manager";
-		sidebarIcon = "bi-briefcase";
-		sidebarColor = "#0F766E";
-		activeStyle = "background-color: #198754;";
-		settingsHref = "account-settings.jsp?role=financialmanager";
-		advisoryHref = "aiadvisory.jsp?role=financialmanager";
-		subtitle = "View dashboard, analyze company performance, and generate company statements.";
-	} 
-	
+if (roleId == 4) {
+
+    roleName = "Staff";
+
+    sidebarTitle = "Financial Advisory";
+    sidebarIcon = "bi-wallet2";
+    sidebarColor = "#0D6EFD";
+    activeStyle = "background-color: #084298;";
+
+    settingsHref = "account-settings.jsp?role=staff";
+    advisoryHref = "aiadvisory.jsp?role=staff";
+
+    subtitle = "View dashboard, manage transactions, and initiate AI advisory.";
+
+} else if (roleId == 3) {
+
+    roleName = "Department Manager";
+
+    sidebarTitle = "Department Manager";
+    sidebarIcon = "bi-person-badge";
+    sidebarColor = "#4338CA";
+    activeStyle = "background-color: #312E81;";
+
+    settingsHref = "account-settings.jsp?role=departmentmanager";
+    advisoryHref = "aiadvisory.jsp?role=departmentmanager";
+
+    subtitle = "Review department transactions, monitor budget usage, and view analytics.";
+
+} else if (roleId == 2) {
+
+    roleName = "Financial Manager";
+
+    sidebarTitle = "Financial Manager";
+    sidebarIcon = "bi-briefcase";
+    sidebarColor = "#0F766E";
+    activeStyle = "background-color: #198754;";
+
+    settingsHref = "account-settings.jsp?role=financialmanager";
+    advisoryHref = "aiadvisory.jsp?role=financialmanager";
+
+    subtitle = "Analyze company performance and generate financial reports.";
+}
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -130,7 +141,7 @@
 			<main class="col-12 col-lg-10 p-4">
 				<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 					<div>
-						<h1 class="fw-bold mb-1"><%= roleName %> Dashboard</h1>
+						<h1 class="fw-bold mb-1"><%= sidebarTitle  %> Dashboard</h1>
 						<p class="text-secondary mb-0"><%= subtitle %></p>
 					</div>
 
@@ -336,9 +347,9 @@
 							<table class="table table-hover align-middle">
 								<thead><tr><th>Date</th><th>Submitted By</th><th>Transaction</th><th>Category</th><th class="text-end">Amount</th><th>Status</th><th class="text-center">Action</th></tr></thead>
 								<tbody>
-									<tr><td>2026-05-14</td><td>Aiman Hakim</td><td>Client Meeting Travel</td><td>Travel</td><td class="text-end text-danger fw-bold">RM 850.00</td><td><span class="badge text-bg-warning rounded-pill">Pending</span></td><td class="text-center"><a class="btn btn-sm btn-outline-primary rounded-pill" href="departmentmanager-transaction-details.jsp?id=travel-001"><i class="bi bi-eye me-1"></i>View Details</a></td></tr>
-									<tr><td>2026-05-13</td><td>Nur Sofia</td><td>Marketing Material Printing</td><td>Marketing</td><td class="text-end text-danger fw-bold">RM 1,250.00</td><td><span class="badge text-bg-warning rounded-pill">Pending</span></td><td class="text-center"><a class="btn btn-sm btn-outline-primary rounded-pill" href="departmentmanager-transaction-details.jsp?id=marketing-001"><i class="bi bi-eye me-1"></i>View Details</a></td></tr>
-									<tr><td>2026-05-12</td><td>Farhan Zaki</td><td>Department Training Fee</td><td>Training</td><td class="text-end text-danger fw-bold">RM 3,000.00</td><td><span class="badge text-bg-warning rounded-pill">Pending</span></td><td class="text-center"><a class="btn btn-sm btn-outline-primary rounded-pill" href="departmentmanager-transaction-details.jsp?id=training-002"><i class="bi bi-eye me-1"></i>View Details</a></td></tr>
+									<tr><td>2026-05-14</td><td>Aiman Hakim</td><td>Client Meeting Travel</td><td>Travel</td><td class="text-end text-danger fw-bold">RM 850.00</td><td><span class="badge text-bg-warning rounded-pill">Pending</span></td><td class="text-center"><a class="btn btn-sm btn-outline-primary rounded-pill" href="/department/departmentmanager-transaction-details.jsp?id=travel-001"><i class="bi bi-eye me-1"></i>View Details</a></td></tr>
+									<tr><td>2026-05-13</td><td>Nur Sofia</td><td>Marketing Material Printing</td><td>Marketing</td><td class="text-end text-danger fw-bold">RM 1,250.00</td><td><span class="badge text-bg-warning rounded-pill">Pending</span></td><td class="text-center"><a class="btn btn-sm btn-outline-primary rounded-pill" href="/department/departmentmanager-transaction-details.jsp?id=marketing-001"><i class="bi bi-eye me-1"></i>View Details</a></td></tr>
+									<tr><td>2026-05-12</td><td>Farhan Zaki</td><td>Department Training Fee</td><td>Training</td><td class="text-end text-danger fw-bold">RM 3,000.00</td><td><span class="badge text-bg-warning rounded-pill">Pending</span></td><td class="text-center"><a class="btn btn-sm btn-outline-primary rounded-pill" href="<%= request.getContextPath() %>/department/departmentmanager-transaction-details.jsp?id=training-002"><i class="bi bi-eye me-1"></i>View Details</a></td></tr>
 								</tbody>
 							</table>
 						</div>

@@ -24,17 +24,17 @@
 				</h4>
 				<div class="nav flex-column nav-pills gap-2">
 					<a class="nav-link active text-white rounded-3"
-						style="background-color: #ff2c2c;" href="admin-user-list.jsp">
+						style="background-color: #ff2c2c;" href="<%= request.getContextPath() %>/admin/admin-user-list.jsp">
 						<i class="bi bi-people me-2"></i> User List
 					</a>
-					<a class="nav-link text-white rounded-3" href="admin-department-list.jsp">
+					<a class="nav-link text-white rounded-3" href="<%= request.getContextPath() %>/admin/admin-department-list.jsp">
 						<i class="bi bi-building me-2"></i> Department List
 					</a>
-					<a class="nav-link text-white rounded-3" href="account-settings.jsp?role=admin">
+					<a class="nav-link text-white rounded-3" href="<%= request.getContextPath() %>/account-settings.jsp?role=admin">
 						<i class="bi bi-gear me-2"></i> Account Settings
 					</a>
 
-					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="index.jsp">
+					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="<%= request.getContextPath() %>/logout">
 						<i class="bi bi-box-arrow-right me-2"></i> <b>Logout</b>
 					</a>
 				</div>
@@ -160,10 +160,10 @@
 		</div>
 	</div>
 
-	<jsp:include page="notification-widget.jsp" />
-	<jsp:include page="chatbot-widget.jsp" />
+	<jsp:include page="/notification-widget.jsp" />
+	<jsp:include page="/chatbot-widget.jsp" />
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="js/chatbot-widget.js?v=2"></script>
+	<script src="<%= request.getContextPath() %>/js/chatbot-widget.js?v=2"></script>
 </body>
 </html>
