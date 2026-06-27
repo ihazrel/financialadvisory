@@ -6,9 +6,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import model.TransactionModel;
 import model.UserModel;
+import model.AttachmentModel;
 import model.CategoryModel;
 import model.TransactionItemModel;
 import util.RequestUtil;
@@ -19,9 +19,12 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import dao.AttachmentDAO;
 import dao.CategoryDAO;
 import dao.TransactionDAO;
 import dao.TransactionItemDAO;
+import helper.RoleHelper;
+import helper.SessionHelper;
 
 /**
  * Servlet implementation class TransactionController
@@ -50,18 +53,11 @@ public class TransactionController extends HttpServlet {
     	}
     	
     	switch (action) {
-    		case "list":
-				// Call the method to list transactions
-				listTransactions(request, response);
-				break;
-				
-    		case "view-details":
-    			// Call the method to view transaction details
-    			viewTransactionDetails(request, response);
-    			break;
-    			
-			default:
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+    		case "list" -> listTransactions(request, response);
+    		
+    		case "view-details" -> viewTransactionDetails(request, response);
+    		
+    		default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
     	}
     }
 
@@ -96,8 +92,7 @@ public class TransactionController extends HttpServlet {
 	
 	private void createTransaction(HttpServletRequest request, HttpServletResponse response, boolean isSubmit) throws ServletException, IOException {
 		
-		HttpSession session = request.getSession();
-		UserModel curr_user = (UserModel) session.getAttribute("user");
+		UserModel curr_user = SessionHelper.getCurrentUser(request);
 		
 		TransactionModel transaction = buildTransaction(request, true);
 		ArrayList<TransactionItemModel> items = buildTransactionItems(request);
@@ -120,8 +115,7 @@ public class TransactionController extends HttpServlet {
 	
 	private void updateTransaction(HttpServletRequest request, HttpServletResponse response, boolean isSubmit) throws ServletException, IOException {
 
-		HttpSession session = request.getSession();
-		UserModel curr_user = (UserModel) session.getAttribute("user");
+		UserModel curr_user = SessionHelper.getCurrentUser(request);
 		
 		TransactionModel transaction = buildTransaction(request, false);
 		ArrayList<TransactionItemModel> items = buildTransactionItems(request);
@@ -157,15 +151,27 @@ public class TransactionController extends HttpServlet {
 	}
 
 	private void confirmApproval(HttpServletRequest request, HttpServletResponse response, boolean isApproved) throws ServletException, IOException {
-	    int transactionId = RequestUtil.getInt(request, "transactionId");
+		UserModel curr_user = SessionHelper.getCurrentUser(request);
+		
+		if (curr_user == null || (!RoleHelper.isFinancialManager(curr_user) && !RoleHelper.isDepartmentManager(curr_user))) {
+	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "You do not have permission to approve or reject transactions.");
+	        return;
+	    }
+		
+		int transactionId = RequestUtil.getInt(request, "transactionId");
 	    
 	    TransactionDAO transactionDAO = new TransactionDAO();
 	    TransactionModel transaction = transactionDAO.getTransactionById(transactionId);
 	    
-	    if (transaction != null && "pending".equals(transaction.getStatus())) {
+	    if (curr_user.getDepartmentId() != transaction.getDepartmentId()) {
+	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "You do not have permission to approve or reject this transaction.");
+	        return;
+	    }
+	    
+	    if (transaction != null && "pending".equalsIgnoreCase(transaction.getStatus())) {
 	    	
 	        transaction.setStatus(isApproved ? "approved" : "rejected");
-	        transaction.setVerifiedBy(((UserModel) request.getSession().getAttribute("user")).getUserId());
+	        transaction.setVerifiedBy(curr_user.getUserId());
 	        
 	        boolean success = transactionDAO.updateTransaction(transaction) != null;
 	        
@@ -181,12 +187,20 @@ public class TransactionController extends HttpServlet {
 		// Implementation for listing transactions
 		
 		TransactionDAO transactionDAO = new TransactionDAO();
+		UserModel curr_user = SessionHelper.getCurrentUser(request);
 		
-		ArrayList<TransactionModel> transactions = transactionDAO.getAllTransactions();
+		ArrayList<TransactionModel> transactions = new ArrayList<>();
+		
+		if (curr_user != null && RoleHelper.isFinancialManager(curr_user)) {
+	        transactions = transactionDAO.getAllTransactions();
+	        return;
+	    } else if (curr_user != null && (RoleHelper.isDepartmentManager(curr_user) || RoleHelper.isStaff(curr_user))) {
+	        transactions = transactionDAO.getTransactionsByDepartmentId(curr_user.getDepartmentId());
+	    }
 		
 		request.setAttribute("transactions_list", transactions);
 		
-		request.getRequestDispatcher("staff-transaction.jsp").forward(request, response);
+		request.getRequestDispatcher("transaction.jsp").forward(request, response);
 	}	
 	
 	private void viewTransactionDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -195,16 +209,32 @@ public class TransactionController extends HttpServlet {
 	    TransactionDAO transactionDAO = new TransactionDAO();
 	    TransactionModel transaction = transactionDAO.getTransactionById(transactionId);
 	    List<CategoryModel> categories = new CategoryDAO().getAllCategories();
+	    UserModel curr_user = SessionHelper.getCurrentUser(request);
 	    
 	    if (transaction != null) {
 	        TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
 	        List<TransactionItemModel> items = transactionItemDAO.getTransactionItemsByTransactionId(transactionId);
+	        List<AttachmentModel> attachments = new AttachmentDAO().getAttachmentsByTransactionId(transactionId);
 	        
+	        // data list
 	        request.setAttribute("transaction", transaction);
 	        request.setAttribute("transaction_items", items);
+	        request.setAttribute("transaction_attachments", attachments);
+	        
+	        // dropdown list
 	        request.setAttribute("categories_dropdown", categories);
 	        
-	        request.getRequestDispatcher("staff-transaction-details.jsp").forward(request, response);
+	        boolean isEditable = transaction.getStatus().equalsIgnoreCase("draft") || transaction.getStatus().equalsIgnoreCase("rejected");
+	        boolean isApprover = curr_user != null 
+	        					&& RoleHelper.isDepartmentManager(curr_user)  // is HoD or Financial Manager
+	        					&& curr_user.getDepartmentId() == transaction.getDepartmentId()  // HoD of the same department as transaction
+	        					&& transaction.getStatus().equalsIgnoreCase("pending");
+	        
+	        // helper variable
+	        request.setAttribute("isEditable", isEditable);
+	        request.setAttribute("isApprover", isApprover);
+	        
+	        request.getRequestDispatcher("transaction-details.jsp").forward(request, response);
 	    } else {
 	        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Transaction not found");
 	    }

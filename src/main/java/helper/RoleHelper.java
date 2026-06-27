@@ -9,35 +9,34 @@ public class RoleHelper {
 	public static final int ROLE_DEPARTMENT_MANAGER = 3;
 	public static final int ROLE_STAFF = 4;
 	
-	
-	public static boolean IsAdmin(UserModel user) {
-		return user != null && user.getRoleId() == ROLE_ADMIN;
+	public static String getRoleName(int roleId) {
+		switch (roleId) {
+			case ROLE_ADMIN:
+				return "System Admin";
+			case ROLE_FINANCIAL_MANAGER:
+				return "Financial Manager";
+			case ROLE_DEPARTMENT_MANAGER:
+				return "Department Manager";
+			case ROLE_STAFF:
+				return "Staff";
+			default:
+				return "Unknown Role";
+		}
 	}
 	
-	public static boolean IsFinancialManager(UserModel user) {
+	public static boolean isAdmin(UserModel user) {
+		return user != null && user.getRoleId() == ROLE_ADMIN;
+	}
+
+	public static boolean isFinancialManager(UserModel user) {
 		return user != null && user.getRoleId() == ROLE_FINANCIAL_MANAGER;
 	}
 	
-	public static boolean IsDepartmentManager(UserModel user) {
-		return user != null && user.getRoleId() == ROLE_DEPARTMENT_MANAGER;
+	public static boolean isDepartmentManager(UserModel user) {
+		return user != null && (user.getRoleId() == ROLE_DEPARTMENT_MANAGER || user.getRoleId() == ROLE_FINANCIAL_MANAGER);
 	}
 	
-	public static boolean IsStaff(UserModel user) {
+	public static boolean isStaff(UserModel user) {
 		return user != null && user.getRoleId() == ROLE_STAFF;
-	}
-	
-	public static String getTheme(int roleId) {
-		switch (roleId) {
-			case ROLE_ADMIN:
-				return "admin-theme.css";
-			case ROLE_FINANCIAL_MANAGER:
-				return "financial-manager-theme.css";
-			case ROLE_DEPARTMENT_MANAGER:
-				return "department-manager-theme.css";
-			case ROLE_STAFF:
-				return "staff-theme.css";
-			default:
-				return "default-theme.css";
-		}
 	}
 }

@@ -127,7 +127,7 @@
 				</div>
 			</a>
 
-			<a href="staff-transaction.jsp"
+			<a href="transaction.jsp"
 				class="list-group-item list-group-item-action p-3 notification-role-item"
 				data-roles="staff">
 				<div class="d-flex gap-3">
@@ -144,7 +144,7 @@
 				</div>
 			</a>
 
-			<a href="staff-transaction.jsp"
+			<a href="transaction.jsp"
 				class="list-group-item list-group-item-action p-3 notification-role-item"
 				data-roles="staff">
 				<div class="d-flex gap-3">

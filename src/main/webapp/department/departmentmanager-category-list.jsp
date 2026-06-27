@@ -33,7 +33,7 @@
 						style="background-color: #312E81;" href="departmentmanager-category-list.jsp">
 						<i class="bi bi-tags me-2"></i> Category
 					</a>
-					<a class="nav-link text-white rounded-3" href="departmentmanager-history.jsp">
+					<a class="nav-link text-white rounded-3" href="TransactionController?action=list">
 						<i class="bi bi-receipt me-2"></i> Transactions
 					</a>
 					<a class="nav-link text-white rounded-3" href="aiadvisory.jsp?role=departmentmanager">
@@ -43,7 +43,7 @@
 						<i class="bi bi-gear me-2"></i> Account Settings
 					</a>
 
-					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="index.jsp">
+					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="<%= request.getContextPath() %>/logout">
 						<i class="bi bi-box-arrow-right me-2"></i> <b>Logout</b>
 					</a>
 				</div>

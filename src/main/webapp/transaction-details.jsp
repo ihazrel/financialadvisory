@@ -8,22 +8,9 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <%
-	TransactionDAO transactionDAO = new TransactionDAO();
-	TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
-	AttachmentDAO attachmentDAO = new AttachmentDAO();
-
 	String action = request.getParameter("action");
 	boolean isCreate = "create".equals(action);
-	boolean isEdit = "edit".equals(action);
-	
-	int id = request.getParameter("id") != null ? Integer.parseInt(request.getParameter("id")) : -1;
-	
-	TransactionModel local_transaction = (TransactionModel) request.getAttribute("transaction");
-	List<TransactionItemModel> local_items = (List<TransactionItemModel>) request.getAttribute("transaction_items");
-	List<AttachmentModel> local_attachments = (List<AttachmentModel>) request.getAttribute("transaction_attachments");
-	
-	boolean isEditable = local_transaction == null || (local_transaction != null && "draft".equalsIgnoreCase(local_transaction.getStatus()));
-%>
+	boolean isEdit = "edit".equals(action);%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -104,7 +91,7 @@
 					<a class="nav-link text-white rounded-3" href="account-settings.jsp?role=staff">
 						<i class="bi bi-gear me-2"></i> Account Settings
 					</a>
-					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="index.jsp">
+					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="<%= request.getContextPath() %>/logout">
 						<i class="bi bi-box-arrow-right me-2"></i> <b>Logout</b>
 					</a>
 				</div>
@@ -126,18 +113,18 @@
 						<div class="card-body p-4">
 							<form action="TransactionController" method="post" enctype="multipart/form-data">
 								<input type="hidden" name="transactionId" value="${transaction != null ? transaction.getTransactionId() : null}">
-								<fieldset <%= isEditable ? "" : "disabled" %>>
+								<fieldset <c:if test="${!isEditable}">disabled</c:if>>
 							
 								<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 mb-4 border-bottom">
 									<h5 class="fw-bold mb-0">
 										<i class="bi bi-receipt me-2"></i><%= isCreate ? "Add New Transaction" : "Edit Transaction" %>
 									</h5>
-									<% if (isEditable) { %>
+									<c:if test="${isEditable}">
 										<button class="btn btn-outline-primary rounded-pill px-4" type="button"
 											data-bs-toggle="modal" data-bs-target="#extractUploadModal">
 											<i class="bi bi-file-earmark-arrow-up me-2"></i>Extract from PDF
 										</button>
-									<% } %>
+									</c:if>
 								</div>
 
 								<div class="row g-3 mb-4">
@@ -238,7 +225,7 @@
 										
 										<c:if test="${transaction_items == null || transaction_items.isEmpty()}">
                                             <div class="no-items-message text-center text-muted py-3" id="noItemsMessage">
-                                                No items to show. <%= isEditable ? "Click \"Add Item\" to start." : "" %>
+                                                No items to show. <c:if test="${isEditable}">Click "Add Item" to start.</c:if>
                                             </div>
 										</c:if>
 									</div>
@@ -247,11 +234,11 @@
 
 								    <!-- LEFT SIDE (optional button) -->
 								    <div>
-								        <% if (isEditable) { %>
+								    	<c:if test="${isEditable}">
 								            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" id="addItemBtn">
 								                <i class="bi bi-plus-circle me-2"></i>Add Item
 								            </button>
-								        <% } %>
+								       	</c:if>
 								    </div>
 								
 								    <!-- RIGHT SIDE (always pushed right) -->
@@ -264,7 +251,7 @@
 								               id="totalAmount"
 								               step="0.1"
 								               name="totalAmount"
-								               value="<%= local_transaction != null ? local_transaction.getTotalAmount() : "" %>"
+								               value="<c:out value='${transaction != null ? transaction.totalAmount : 0.00}'/>"
 								               style="max-width: 160px;">
 								    </div>
 								
@@ -276,46 +263,48 @@
 										<h6 class="fw-bold mb-0">
 											<i class="bi bi-paperclip me-2"></i>Attachment List
 										</h6>
-										<% if (isEditable) { %>
-										<button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
-											data-bs-toggle="modal" data-bs-target="#attachmentUploadModal">
-											<i class="bi bi-upload me-2"></i>Upload Attachment
-										</button>
-										<% } %>
+										<c:if test="${isEditable}">
+                                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                                data-bs-toggle="modal" data-bs-target="#attachmentUploadModal">
+                                                <i class="bi bi-upload me-2"></i>Upload Attachment
+                                            </button>}
+                                   		</c:if>
 									</div>
 
 									<div id="attachmentList" class="vstack gap-2">
 									
-									<% if (local_attachments != null && !local_attachments.isEmpty()) {
-									   		for (AttachmentModel attachment : local_attachments) { %>
-										<div class="attachment-row border-bottom pb-2">
-											<div>
-												<i class="bi bi-file-earmark-pdf text-danger me-2"></i>
-												<span class="fw-semibold"><%= attachment.getName() %></span>
+									<c:choose >
+										<c:when test="${transaction_attachments != null && !transaction_attachments.isEmpty()}">
+	                                        <c:forEach var="attachment" items="${transaction_attachments}">
+		                                    <div class="attachment-row border-bottom pb-2">
+												<div>
+													<i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+													<span class="fw-semibold">${attachment.name}</span>
+												</div>
+												<span class="text-secondary small">${ empty attachment.description ? 'No description available' : attachment.description }</span>
+												<button type="button" class="btn btn-outline-danger rounded-circle remove-attachment" aria-label="Delete attachment">
+													<i class="bi bi-trash"></i>
+												</button>
 											</div>
-											<span class="text-secondary small"><%= attachment.getDescription() %></span>
-											<button type="button" class="btn btn-outline-danger rounded-circle remove-attachment" aria-label="Delete attachment">
-												<i class="bi bi-trash"></i>
-											</button>
-										</div>
-										<%
-                                                }
-                                            } else {
-										%>
-											<div class="no-items-message text-center text-muted py-3">
-                                                No attachment to show. <%= isEditable ? "Click \"Upload Attachment\" to add." : "" %>
+	                                        
+	                                        </c:forEach>
+                                    	</c:when>
+                                    	
+                                    	<c:otherwise>
+                                    		<div class="no-items-message text-center text-muted py-3">
+                                                No attachment to show. <c:if test="${isEditable}">Click "Upload Attachment" to add.</c:if>
                                             </div>
-                                        	<%
-                                            }
-										%>
+                                    	</c:otherwise>
+									</c:choose>
 									</div>
 								</div>
 
 								<div class="d-flex flex-wrap justify-content-end gap-2">
-								<% if (isEditable) { %>
+								
+								<c:if test="${isEditable }">
 									<a class="btn btn-outline-secondary rounded-pill px-4" href="TransactionController?action=list">Cancel</a>
 										
-									<button class="btn <c:if test="${transaction != null}">btn-outline-primary</c:if><c:if test="${transaction == null}">btn-primary</c:if> rounded-pill px-4" type="submit" name="action" value="<%= local_transaction != null ? "update" : "create"%>">
+									<button class="btn <c:if test="${transaction != null}">btn-outline-primary</c:if><c:if test="${transaction == null}">btn-primary</c:if> rounded-pill px-4" type="submit" name="action" value="${ empty transaction ? 'create' : 'update' }">
 										<i class="bi bi-floppy2 me-2"></i>Save
 									</button>
 									
@@ -324,11 +313,11 @@
                                             <i class="bi bi-send-check me-2"></i>Submit Transaction
                                     	</button>
 									</c:if>
-								<% } %>
+								</c:if>
 								</div>
 									</fieldset>
 								<div class="d-flex flex-wrap justify-content-end gap-2">
-								<c:if test="${transaction != null && transaction.status == 'pending'}">
+								<c:if test="${ !isEditable && isApprover}">
                                     <button class="btn btn-danger rounded-pill px-4" type="submit" name="action" value="reject">
 										<i class="bi bi-x-circle me-3"></i>Reject
 									</button>

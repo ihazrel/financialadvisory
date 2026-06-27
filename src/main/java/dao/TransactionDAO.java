@@ -12,7 +12,7 @@ import model.TransactionModel;
 
 public class TransactionDAO {
 
-	public TransactionModel getTransactionById(int transactionId) {
+	public TransactionModel getTransactionById(Integer transactionId) {
 		try {
 			Connection conn = DBConnection.getConnection();
 			Statement stmt = conn.createStatement();
@@ -121,6 +121,80 @@ public class TransactionDAO {
 					    ON transaction.verifiedby = verified.userid
 					ORDER BY dateTransaction DESC
 					""");
+			
+			ArrayList<TransactionModel> transactions = new ArrayList<>();
+			
+			while (rs.next()) {
+				TransactionModel transaction = new TransactionModel(rs.getInt("transactionId"),
+						rs.getString("transactionName"),
+						rs.getString("transactionDescription"),
+						rs.getString("invoiceNO"),
+						rs.getString("payer"),
+						rs.getString("payee"),
+						rs.getInt("categoryId"),
+						rs.getString("CategoryName"),
+						rs.getInt("departmentId"),
+						rs.getString("DepartmentName"),
+						rs.getString("transactionType"),
+						rs.getString("paymentMethod"),
+						rs.getDouble("totalAmount"),
+						rs.getString("currency"),
+						rs.getDate("dateTransaction"),
+						rs.getString("status"),
+						rs.getInt("createdBy"),
+						rs.getString("createdName"),
+						rs.getInt("verifiedBy"),
+						rs.getString("verifiedName"));
+				
+				transactions.add(transaction);
+			}
+			
+			conn.close();
+			return transactions;
+			
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		
+		return new ArrayList<>(); // Placeholder return statement
+	}
+	
+	public ArrayList<TransactionModel> getTransactionsByDepartmentId(Integer departmentId) {
+		try {
+			Connection conn = DBConnection.getConnection();
+			Statement stmt = conn.createStatement();
+			
+			ResultSet rs = stmt.executeQuery("SELECT\r\n"
+					+ "    transactionid AS transactionId,\r\n"
+					+ "    transaction.name AS transactionName,\r\n"
+					+ "    transaction.description AS transactionDescription,\r\n"
+					+ "    invoiceno AS invoiceNO,\r\n"
+					+ "    payer AS payer,\r\n"
+					+ "    payee AS payee,\r\n"
+					+ "    transaction.categoryId AS categoryId,\r\n"
+					+ "    c.name AS categoryName,\r\n"
+					+ "    transaction.departmentId AS departmentId,\r\n"
+					+ "    d.name AS departmentName,\r\n"
+					+ "    transactionType AS transactionType,\r\n"
+					+ "    paymentMethod AS paymentMethod,\r\n"
+					+ "    totalAmount AS totalAmount,\r\n"
+					+ "    currency AS currency,\r\n"
+					+ "    dateTransaction AS dateTransaction,\r\n"
+					+ "    createdBy AS createdBy,\r\n"
+					+ "    created.name AS createdName,\r\n"
+					+ "    verifiedBy AS verifiedBy,\r\n"
+					+ "    verified.name AS verifiedName,\r\n"
+					+ "    status AS status\r\n"
+					+ "FROM transaction\r\n"
+					+ "LEFT JOIN category c\r\n"
+					+ "    ON transaction.categoryid = c.categoryid\r\n"
+					+ "LEFT JOIN department d\r\n"
+					+ "    ON transaction.departmentid = d.departmentid\r\n"
+					+ "LEFT JOIN users created\r\n"
+					+ "    ON transaction.createdby = created.userid\r\n"
+					+ "LEFT JOIN users verified\r\n"
+					+ "    ON transaction.verifiedby = verified.userid\r\n"
+					+ "WHERE transaction.departmentId = "+departmentId);
 			
 			ArrayList<TransactionModel> transactions = new ArrayList<>();
 			

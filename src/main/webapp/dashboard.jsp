@@ -106,7 +106,7 @@ if (roleId == 4) {
 						<i class="bi bi-speedometer2 me-2"></i> Dashboard
 					</a>
 
-					<% if (roleId == 1) { %>
+					<% if (roleId == 4) { %>
 					<a class="nav-link text-white rounded-3" href="TransactionController?action=list">
 						<i class="bi bi-cash-coin me-2"></i> Transactions
 					</a>
@@ -119,7 +119,7 @@ if (roleId == 4) {
 					<a class="nav-link text-white rounded-3" href="departmentmanager-category-list.jsp">
 						<i class="bi bi-tags me-2"></i> Category
 					</a>
-					<a class="nav-link text-white rounded-3" href="departmentmanager-history.jsp">
+					<a class="nav-link text-white rounded-3" href="TransactionController?action=list">
 						<i class="bi bi-receipt me-2"></i> Transactions
 					</a>
 					<% } %>
@@ -132,7 +132,7 @@ if (roleId == 4) {
 						<i class="bi bi-gear me-2"></i> Account Settings
 					</a>
 
-					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="logout">
+					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="<%= request.getContextPath() %>/logout">
 						<i class="bi bi-box-arrow-right me-2"></i> <b>Logout</b>
 					</a>
 				</div>
@@ -259,7 +259,7 @@ if (roleId == 4) {
 							<div class="card-body p-4">
 								<div class="d-flex justify-content-between align-items-center mb-3">
 									<h5 class="fw-bold mb-0">Recent Transactions</h5>
-									<a href="staff-transaction.jsp" class="text-decoration-none">View All</a>
+									<a href="transaction.jsp" class="text-decoration-none">View All</a>
 								</div>
 								<div class="table-responsive">
 									<table class="table table-hover align-middle">

@@ -105,7 +105,7 @@
 					<% } %>
 
 					<% if ("staff".equals(role)) { %>
-					<a class="nav-link text-white rounded-3" href="staff-transaction.jsp">
+					<a class="nav-link text-white rounded-3" href="TransactionController?action=list">
 						<i class="bi bi-cash-coin me-2"></i> Transactions
 					</a>
 					<a class="nav-link text-white rounded-3" href="aiadvisory.jsp?role=staff">
@@ -117,7 +117,7 @@
 					<a class="nav-link text-white rounded-3" href="departmentmanager-budget.jsp">
 						<i class="bi bi-wallet2 me-2"></i> Budget Management
 					</a>
-					<a class="nav-link text-white rounded-3" href="departmentmanager-history.jsp">
+					<a class="nav-link text-white rounded-3" href="TransactionController?action=list">
 						<i class="bi bi-receipt me-2"></i> Transactions
 					</a>
 					<a class="nav-link text-white rounded-3" href="aiadvisory.jsp?role=departmentmanager">
@@ -136,7 +136,7 @@
 						<i class="bi bi-gear me-2"></i> Account Settings
 					</a>
 
-					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="index.jsp">
+					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="<%= request.getContextPath() %>/logout">
 						<i class="bi bi-box-arrow-right me-2"></i> <b>Logout</b>
 					</a>
 				</div>
