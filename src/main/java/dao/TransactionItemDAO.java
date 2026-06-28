@@ -8,6 +8,7 @@ import java.util.*;
 
 import connection.DBConnection;
 import model.TransactionItemModel;
+import util.ErrorUtil;
 
 public class TransactionItemDAO {
 	public ArrayList<TransactionItemModel> getTransactionItemsByTransactionId(int transactionId) {
@@ -32,7 +33,7 @@ public class TransactionItemDAO {
 			conn.close();
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionItemDAO.java", "getTransactionItemsByTransactionId", e);
 		}
 		
 		return items; // Return the list of items
@@ -57,7 +58,7 @@ public class TransactionItemDAO {
 			return rowsAffected > 0; // Return true if the insert was successful
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionItemDAO.java", "addTransactionItem", e);
 			return false; // Return false if there was an error
 		}
 	}
@@ -94,7 +95,7 @@ public class TransactionItemDAO {
 			return rowsAffected > 0; // Return true if the update was successful
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionItemDAO.java", "updateTransactionItem", e);
 			return false; // Return false if there was an error
 		}
 	}
@@ -152,7 +153,7 @@ public class TransactionItemDAO {
 			return rowsAffected > 0; // Return true if the delete was successful
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionItemDAO.java", "deleteTransactionItem", e);
 			return false; // Return false if there was an error
 		}
 	}
@@ -172,7 +173,7 @@ public class TransactionItemDAO {
 			return rowsAffected > 0; // Return true if the delete was successful
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionItemDAO.java", "deleteTransactionItemsByTransactionId", e);
 			return false; // Return false if there was an error
 		}
 	}

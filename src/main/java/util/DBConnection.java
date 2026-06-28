@@ -23,8 +23,7 @@ public class DBConnection {
 		try {
 			Class.forName(ORACLE_DRIVER);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorUtil.log("DBConnection.java", "getConnection", e);
 		}
 		
         return DriverManager.getConnection(

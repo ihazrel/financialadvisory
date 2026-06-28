@@ -6,18 +6,24 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import model.TransactionModel;
 import model.UserModel;
 import model.AttachmentModel;
 import model.CategoryModel;
 import model.TransactionItemModel;
-import util.RequestUtil;
+import util.ErrorUtil;
 
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import dao.AttachmentDAO;
 import dao.CategoryDAO;
@@ -48,7 +54,8 @@ public class TransactionController extends HttpServlet {
     	String action = request.getParameter("action");
     	
     	if (action == null || action.isEmpty()) {
-    		response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action parameter is missing");
+    		response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+    				ErrorUtil.format("TransactionController.java", "doGet", "Action parameter is missing"));
     		return;
     	}
     	
@@ -57,7 +64,10 @@ public class TransactionController extends HttpServlet {
     		
     		case "view-details" -> viewTransactionDetails(request, response);
     		
-    		default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+    		case "create-details" -> createTransactionDetails(request, response);
+    		
+    		default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+    				ErrorUtil.format("TransactionController.java", "doGet", "Invalid action"));
     	}
     }
 
@@ -69,7 +79,8 @@ public class TransactionController extends HttpServlet {
 		String action = request.getParameter("action");
 		
 		if (action == null || action.isEmpty()) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action parameter is missing");
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+					ErrorUtil.format("TransactionController.java", "doPost", "Action parameter is missing"));
 			return;
 		}
 		
@@ -86,7 +97,8 @@ public class TransactionController extends HttpServlet {
 			
 			case "reject" -> confirmApproval(request, response, false);
 				
-			default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+			default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+					ErrorUtil.format("TransactionController.java", "doPost", "Invalid action"));
 		}
 	}
 	
@@ -109,6 +121,7 @@ public class TransactionController extends HttpServlet {
 		
 		TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
 		transactionItemDAO.upsertAllTransactionItems(items, updatedTransactionId);
+		saveUploadedAttachments(request, updatedTransactionId);
 
 		listTransactions(request, response);	
 	} 
@@ -130,17 +143,29 @@ public class TransactionController extends HttpServlet {
 		
 		TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
 		transactionItemDAO.upsertAllTransactionItems(items, updatedTransactionId);
+		saveUploadedAttachments(request, updatedTransactionId);
 
 		listTransactions(request, response);
 	} 
 	
 	private void deleteTransaction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    int transactionId = RequestUtil.getInt(request, "transactionId");
+	    int transactionId = getIntParameter(request, "transactionId");
 	    
 	    TransactionDAO transactionDAO = new TransactionDAO();
+	    AttachmentDAO attachmentDAO = new AttachmentDAO();
+	    ArrayList<AttachmentModel> attachments = attachmentDAO.getAttachmentsByTransactionId(transactionId);
 	    boolean success = transactionDAO.deleteTransaction(transactionId);
 	    
 	    if (success) {
+	    	for (AttachmentModel attachment : attachments) {
+	    		if (attachment.getFilePath() != null) {
+	    			try {
+	    				Files.deleteIfExists(Paths.get(attachment.getFilePath()).normalize());
+	    			} catch (IOException e) {
+	    				ErrorUtil.log("TransactionController.java", "deleteTransaction", e);
+	    			}
+	    		}
+	    	}
 	    	response.sendRedirect("transaction.jsp"); // Redirect to a success page after creation
 	    }
 	}
@@ -154,17 +179,28 @@ public class TransactionController extends HttpServlet {
 		UserModel curr_user = SessionHelper.getCurrentUser(request);
 		
 		if (curr_user == null || (!RoleHelper.isFinancialManager(curr_user) && !RoleHelper.isDepartmentManager(curr_user))) {
-	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "You do not have permission to approve or reject transactions.");
+	        response.sendError(HttpServletResponse.SC_FORBIDDEN,
+	        		ErrorUtil.format("TransactionController.java", "confirmApproval",
+	        				"You do not have permission to approve or reject transactions."));
 	        return;
 	    }
 		
-		int transactionId = RequestUtil.getInt(request, "transactionId");
+		int transactionId = getIntParameter(request, "transactionId");
 	    
 	    TransactionDAO transactionDAO = new TransactionDAO();
 	    TransactionModel transaction = transactionDAO.getTransactionById(transactionId);
 	    
+	    if (transaction == null) {
+	        response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+	        		ErrorUtil.format("TransactionController.java", "confirmApproval",
+	        				"Transaction not found or not in pending status"));
+	        return;
+	    }
+	    
 	    if (curr_user.getDepartmentId() != transaction.getDepartmentId()) {
-	        response.sendError(HttpServletResponse.SC_FORBIDDEN, "You do not have permission to approve or reject this transaction.");
+	        response.sendError(HttpServletResponse.SC_FORBIDDEN,
+	        		ErrorUtil.format("TransactionController.java", "confirmApproval",
+	        				"You do not have permission to approve or reject this transaction."));
 	        return;
 	    }
 	    
@@ -179,7 +215,9 @@ public class TransactionController extends HttpServlet {
 	        	listTransactions(request, response); // Redirect to a success page after approval
 	        }
 	    } else {
-	        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Transaction not found or not in pending status");
+	        response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+	        		ErrorUtil.format("TransactionController.java", "confirmApproval",
+	        				"Transaction not found or not in pending status"));
 	    }
 	}
 	
@@ -204,7 +242,7 @@ public class TransactionController extends HttpServlet {
 	}	
 	
 	private void viewTransactionDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    int transactionId = RequestUtil.getInt(request, "transactionId");
+	    int transactionId = getIntParameter(request, "transactionId");
 	    
 	    TransactionDAO transactionDAO = new TransactionDAO();
 	    TransactionModel transaction = transactionDAO.getTransactionById(transactionId);
@@ -236,8 +274,17 @@ public class TransactionController extends HttpServlet {
 	        
 	        request.getRequestDispatcher("transaction-details.jsp").forward(request, response);
 	    } else {
-	        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Transaction not found");
+	        response.sendError(HttpServletResponse.SC_NOT_FOUND,
+	        		ErrorUtil.format("TransactionController.java", "viewTransactionDetails", "Transaction not found"));
 	    }
+	}
+
+	private void createTransactionDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		List<CategoryModel> categories = new CategoryDAO().getAllCategories();
+
+		request.setAttribute("categories_dropdown", categories);
+		request.setAttribute("isEditable", true);
+		request.getRequestDispatcher("transaction-details.jsp").forward(request, response);
 	}
 
 	private TransactionModel buildTransaction(HttpServletRequest request, boolean isNewRecord) {
@@ -247,35 +294,35 @@ public class TransactionController extends HttpServlet {
 	    if (isNewRecord) {
 	    	transaction.setTransactionId(null);
 	    } else {
-	    	transaction.setTransactionId(RequestUtil.getInt(request, "transactionId"));
+	    	transaction.setTransactionId(getIntParameter(request, "transactionId"));
 	    }
 
-	    transaction.setName(RequestUtil.getString(request, "title"));
-	    transaction.setDescription(RequestUtil.getString(request, "description"));
-	    transaction.setInvoiceNo(RequestUtil.getString(request, "invoiceNo"));
-	    transaction.setPayer(RequestUtil.getString(request, "payer"));
-	    transaction.setPayee(RequestUtil.getString(request, "payee"));
+	    transaction.setName(getStringParameter(request, "title"));
+	    transaction.setDescription(getStringParameter(request, "description"));
+	    transaction.setInvoiceNo(getStringParameter(request, "invoiceNo"));
+	    transaction.setPayer(getStringParameter(request, "payer"));
+	    transaction.setPayee(getStringParameter(request, "payee"));
 
-	    transaction.setCategoryId(RequestUtil.getInt(request, "categoryId"));
-	    transaction.setDepartmentId(RequestUtil.getInt(request, "departmentId"));
+	    transaction.setCategoryId(getIntParameter(request, "categoryId"));
+	    transaction.setDepartmentId(getIntParameter(request, "departmentId"));
 
 	    transaction.setTransactionType(
-	        RequestUtil.getString(request, "transactionType"));
+	        getStringParameter(request, "transactionType"));
 
 	    transaction.setPaymentMethod(
-	        RequestUtil.getString(request, "paymentMethod"));
+	        getStringParameter(request, "paymentMethod"));
 
 	    transaction.setTotalAmount(
-	        RequestUtil.getDouble(request, "totalAmount"));
+	        getDoubleParameter(request, "totalAmount"));
 
 	    transaction.setCurrency(
-	        RequestUtil.getString(request, "currency"));
+	        getStringParameter(request, "currency"));
 
 	    transaction.setDateTransaction(
-	        Date.valueOf(RequestUtil.getString(request, "transactionDate")));
+	        Date.valueOf(getStringParameter(request, "transactionDate")));
 
 	    transaction.setStatus(
-	        RequestUtil.getString(request, "status"));
+	        getStringParameter(request, "status"));
 
 	    return transaction;
 	}
@@ -302,5 +349,70 @@ public class TransactionController extends HttpServlet {
 	    }
 
 	    return items;
+	}
+
+	private void saveUploadedAttachments(HttpServletRequest request, Integer transactionId) throws IOException, ServletException {
+		if (transactionId == null || transactionId == 0) {
+			return;
+		}
+
+		Collection<Part> parts = request.getParts();
+		AttachmentDAO attachmentDAO = new AttachmentDAO();
+
+		for (Part part : parts) {
+			if (!"attachments".equals(part.getName()) || part.getSize() <= 0) {
+				continue;
+			}
+
+			String submittedFileName = part.getSubmittedFileName();
+			if (submittedFileName == null || submittedFileName.isBlank()) {
+				continue;
+			}
+			submittedFileName = Paths.get(submittedFileName).getFileName().toString();
+
+			Path uploadDirectory = getUploadDirectory(request);
+			Files.createDirectories(uploadDirectory);
+
+			String storedFileName = UUID.randomUUID() + "_" + sanitizeFileName(submittedFileName);
+			Path targetFile = uploadDirectory.resolve(storedFileName).normalize();
+			part.write(targetFile.toString());
+
+			AttachmentModel attachment = new AttachmentModel();
+			attachment.setTransactionId(transactionId);
+			attachment.setName(submittedFileName);
+			attachment.setDescription("");
+			attachment.setFileType(part.getContentType());
+			attachment.setFilePath(targetFile.toString());
+
+			attachmentDAO.addAttachment(attachment);
+		}
+	}
+
+	private Path getUploadDirectory(HttpServletRequest request) {
+		String realPath = request.getServletContext().getRealPath("/uploads/transaction-attachments");
+		if (realPath != null) {
+			return Paths.get(realPath);
+		}
+
+		return Paths.get(System.getProperty("user.home"), "aiadvisoryfinancial", "transaction-attachments");
+	}
+
+	private String sanitizeFileName(String fileName) {
+		return fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+	}
+
+	private String getStringParameter(HttpServletRequest request, String key) {
+		String value = request.getParameter(key);
+		return (value == null || value.trim().isEmpty()) ? "" : value.trim();
+	}
+
+	private int getIntParameter(HttpServletRequest request, String key) {
+		String value = getStringParameter(request, key);
+		return value.isEmpty() ? 0 : Integer.parseInt(value);
+	}
+
+	private double getDoubleParameter(HttpServletRequest request, String key) {
+		String value = getStringParameter(request, key);
+		return value.isEmpty() ? 0.0 : Double.parseDouble(value);
 	}
 }

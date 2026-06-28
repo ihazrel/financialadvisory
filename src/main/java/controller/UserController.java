@@ -11,6 +11,7 @@ import java.io.IOException;
 
 import dao.UserDAO;
 import model.UserModel;
+import util.ErrorUtil;
 
 import dao.RoleDAO;
 import model.RoleModel;
@@ -57,6 +58,8 @@ public class UserController extends HttpServlet {
             response.sendRedirect("dashboard.jsp");
             
         }else{
+            request.getSession().setAttribute("error",
+                    ErrorUtil.format("UserController.java", "doPost", "Invalid email or password"));
         	response.sendRedirect( "login.jsp?error=1" );
         }
         

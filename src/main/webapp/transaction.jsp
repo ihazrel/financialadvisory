@@ -110,7 +110,7 @@
 								<i class="bi bi-list-ul me-2"></i> Transaction List
 							</h5>
 							<div class="d-flex gap-2">
-									<a href="transaction-details.jsp?id=0" class="btn btn-primary rounded-pill px-4">
+									<a href="TransactionController?action=create-details" class="btn btn-primary rounded-pill px-4">
 										<i class="bi bi-plus-circle me-2"></i>Create New
 									</a>
 									<a href="#" class="btn btn-outline-primary rounded-pill px-4">

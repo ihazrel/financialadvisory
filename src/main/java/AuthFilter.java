@@ -2,6 +2,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.*;
 import model.UserModel;
+import util.ErrorUtil;
 
 import java.io.IOException;
 
@@ -41,7 +42,7 @@ public class AuthFilter implements Filter {
         if (session == null || session.getAttribute("user") == null) {
 
             session = req.getSession(true);
-            session.setAttribute("error", "Please login first");
+            session.setAttribute("error", ErrorUtil.format("AuthFilter.java", "doFilter", "Please login first"));
 
             res.sendRedirect(contextPath + "/login.jsp");
             return;
@@ -56,7 +57,7 @@ public class AuthFilter implements Filter {
         // SYSTEM ADMIN ONLY PAGES
         if (url.contains("/admin/") && roleId != 1) {
 
-            session.setAttribute("error", "Access denied");
+            session.setAttribute("error", ErrorUtil.format("AuthFilter.java", "doFilter", "Access denied"));
 
             res.sendRedirect(contextPath + "/admin/admin-user-list.jsp");
             return;
@@ -65,7 +66,7 @@ public class AuthFilter implements Filter {
         // FINANCIAL MANAGER ONLY PAGES
         if (url.contains("financialmanager-") && roleId != 2) {
 
-            session.setAttribute("error", "Access denied");
+            session.setAttribute("error", ErrorUtil.format("AuthFilter.java", "doFilter", "Access denied"));
             
             res.sendRedirect(contextPath + "/dashboard.jsp");
             return;
@@ -74,7 +75,7 @@ public class AuthFilter implements Filter {
         // DEPARTMENT MANAGER ONLY PAGES
         if (url.contains("/department/") && roleId != 3) {
 
-            session.setAttribute("error", "Access denied");
+            session.setAttribute("error", ErrorUtil.format("AuthFilter.java", "doFilter", "Access denied"));
 
             res.sendRedirect(contextPath + "/dashboard.jsp");
             return;
@@ -83,7 +84,7 @@ public class AuthFilter implements Filter {
         // STAFF ONLY PAGES
         if (url.contains("staff-") && roleId != 4) {
 
-            session.setAttribute("error", "Access denied");
+            session.setAttribute("error", ErrorUtil.format("AuthFilter.java", "doFilter", "Access denied"));
 
             res.sendRedirect(contextPath + "/dashboard.jsp");
             return;

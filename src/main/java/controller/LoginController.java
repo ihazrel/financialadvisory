@@ -12,6 +12,7 @@ import java.io.IOException;
 import model.UserModel;
 import dao.UserDAO;
 import helper.RoleHelper;
+import util.ErrorUtil;
 
 /**
  * Servlet implementation class LoginController
@@ -71,6 +72,8 @@ public class LoginController extends HttpServlet {
 
         } else {
 
+            request.getSession().setAttribute("error",
+                    ErrorUtil.format("LoginController.java", "doPost", "Invalid email or password"));
             response.sendRedirect("login.jsp?error=1");
         }
 	}

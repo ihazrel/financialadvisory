@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import model.RoleModel;
+import util.ErrorUtil;
 
 public class RoleDAO {
 	private static Connection conn = null;
@@ -34,7 +35,7 @@ public class RoleDAO {
             }
 
         } catch(Exception e) {
-            e.printStackTrace();
+            ErrorUtil.log("RoleDAO.java", "getAllRoles", e);
         }
 
         return list;

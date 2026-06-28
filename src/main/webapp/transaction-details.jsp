@@ -9,7 +9,7 @@
 
 <%
 	String action = request.getParameter("action");
-	boolean isCreate = "create".equals(action);
+	boolean isCreate = "create".equals(action) || "create-details".equals(action);
 	boolean isEdit = "edit".equals(action);%>
 
 <!DOCTYPE html>
@@ -56,7 +56,7 @@
 
 	.attachment-row {
 		display: grid;
-		grid-template-columns: minmax(180px, 1fr) 150px 44px;
+		grid-template-columns: minmax(180px, 1fr) minmax(140px, 220px) 44px 44px;
 		gap: .75rem;
 		align-items: center;
 	}
@@ -93,8 +93,9 @@
 
 					<section class="card border-0 shadow-sm transaction-form-card">
 						<div class="card-body p-4">
-							<form action="TransactionController" method="post" enctype="multipart/form-data">
+							<form id="transactionForm" action="TransactionController" method="post" enctype="multipart/form-data">
 								<input type="hidden" name="transactionId" value="${transaction != null ? transaction.getTransactionId() : null}">
+								<div id="pendingAttachmentInputs" class="d-none"></div>
 								<fieldset <c:if test="${!isEditable}">disabled</c:if>>
 							
 								<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pb-3 mb-4 border-bottom">
@@ -231,7 +232,7 @@
 								        <input type="number"
 								               class="form-control rounded-3 fw-bold text-danger"
 								               id="totalAmount"
-								               step="0.1"
+								               step="0.05"
 								               name="totalAmount"
 								               value="<c:out value='${transaction != null ? transaction.totalAmount : 0.00}'/>"
 								               style="max-width: 160px;">
@@ -249,7 +250,7 @@
                                             <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
                                                 data-bs-toggle="modal" data-bs-target="#attachmentUploadModal">
                                                 <i class="bi bi-upload me-2"></i>Upload Attachment
-                                            </button>}
+                                            </button>
                                    		</c:if>
 									</div>
 
@@ -258,22 +259,29 @@
 									<c:choose >
 										<c:when test="${transaction_attachments != null && !transaction_attachments.isEmpty()}">
 	                                        <c:forEach var="attachment" items="${transaction_attachments}">
-		                                    <div class="attachment-row border-bottom pb-2">
+		                                    <div class="attachment-row border-bottom pb-2" data-attachment-id="${attachment.attachmentId}">
 												<div>
 													<i class="bi bi-file-earmark-pdf text-danger me-2"></i>
 													<span class="fw-semibold">${attachment.name}</span>
 												</div>
 												<span class="text-secondary small">${ empty attachment.description ? 'No description available' : attachment.description }</span>
-												<button type="button" class="btn btn-outline-danger rounded-circle remove-attachment" aria-label="Delete attachment">
-													<i class="bi bi-trash"></i>
-												</button>
+												<a class="btn btn-outline-primary rounded-circle"
+													href="AttachmentController?action=download&attachmentId=${attachment.attachmentId}"
+													aria-label="Download attachment" title="Download attachment">
+													<i class="bi bi-download"></i>
+												</a>
+												<c:if test="${isEditable}">
+													<button type="button" class="btn btn-outline-danger rounded-circle remove-attachment" aria-label="Delete attachment" title="Delete attachment">
+														<i class="bi bi-trash"></i>
+													</button>
+												</c:if>
 											</div>
 	                                        
 	                                        </c:forEach>
                                     	</c:when>
                                     	
                                     	<c:otherwise>
-                                    		<div class="no-items-message text-center text-muted py-3">
+                                    		<div class="no-items-message text-center text-muted py-3" id="noAttachmentsMessage">
                                                 No attachment to show. <c:if test="${isEditable}">Click "Upload Attachment" to add.</c:if>
                                             </div>
                                     	</c:otherwise>
@@ -352,12 +360,12 @@
 						<span class="fw-bold">Upload supporting attachment</span>
 						<span class="text-secondary small">Drag and drop file here, or click to browse</span>
 						<span class="selected-file text-primary small mt-2"></span>
-						<input class="d-none upload-input" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
+						<input id="attachmentFileInput" class="d-none upload-input" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
 					</label>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-					<button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Confirm</button>
+					<button id="confirmAttachmentUpload" type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Confirm</button>
 				</div>
 			</div>
 		</div>
@@ -368,6 +376,11 @@
 	<script>
 		const lineItems = document.getElementById("lineItems");
 		const grandTotal = document.getElementById("totalAmount");
+		const contextPath = "${pageContext.request.contextPath}";
+		const attachmentList = document.getElementById("attachmentList");
+		const pendingAttachmentInputs = document.getElementById("pendingAttachmentInputs");
+		const confirmAttachmentUpload = document.getElementById("confirmAttachmentUpload");
+		const attachmentModal = document.getElementById("attachmentUploadModal");
 
 		// 
 		function updateLineTotal(row) {
@@ -401,25 +414,30 @@
 		
 		function addEmptyMessage(containerId, message) {
 			const noItemsMessage = document.getElementById(containerId).querySelector(".no-items-message");
-			noItemsMessage.classList.remove("d-none");
+			if (noItemsMessage) {
+				noItemsMessage.classList.remove("d-none");
+			}
         }
 
-		document.getElementById("addItemBtn").addEventListener("click", () => {
-			removeEmptyMessage("lineItems");
-			
-			const row = document.createElement("div");
-			row.className = "line-item-grid line-item-row";
-			row.innerHTML = `
-				<input type="text" class="form-control rounded-3" name="itemName" placeholder="Item name">
-				<input type="text" class="form-control rounded-3" name="itemDescription" placeholder="Item description">
-				<input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="1" min="0" step="1">
-				<input type="number" class="form-control rounded-3 item-price" name="itemUnitPrice" value="0.00" min="0" step="0.01">
-				<input type="number" class="form-control rounded-3 item-total fw-bold" name="itemTotal" value="0.00" min="0" step="0.01">
-				<button type="button" class="btn btn-outline-danger rounded-circle remove-row" aria-label="Delete item">
-					<i class="bi bi-trash"></i>
-				</button>`;
-			lineItems.appendChild(row);
-		});
+		const addItemBtn = document.getElementById("addItemBtn");
+		if (addItemBtn) {
+			addItemBtn.addEventListener("click", () => {
+				removeEmptyMessage("lineItems");
+				
+				const row = document.createElement("div");
+				row.className = "line-item-grid line-item-row";
+				row.innerHTML = `
+					<input type="text" class="form-control rounded-3" name="itemName" placeholder="Item name">
+					<input type="text" class="form-control rounded-3" name="itemDescription" placeholder="Item description">
+					<input type="number" class="form-control rounded-3 item-qty" name="itemQuantity" value="1" min="0" step="1">
+					<input type="number" class="form-control rounded-3 item-price" name="itemUnitPrice" value="0.00" min="0" step="0.01">
+					<input type="number" class="form-control rounded-3 item-total fw-bold" name="itemTotal" value="0.00" min="0" step="0.01">
+					<button type="button" class="btn btn-outline-danger rounded-circle remove-row" aria-label="Delete item">
+						<i class="bi bi-trash"></i>
+					</button>`;
+				lineItems.appendChild(row);
+			});
+		}
 
 		lineItems.addEventListener("input", (event) => {
 			const row = event.target.closest(".line-item-row");
@@ -459,7 +477,7 @@
 				formData.append("action", "delete");
 				formData.append("itemId", itemId)
 				
-		        const res = await fetch(`${window.location.origin}/aiadvisoryfinancial/TransactionItemController`, {
+		        const res = await fetch(`${contextPath}/TransactionItemController`, {
 		            method: "POST",
 		            headers: {
 		                "Content-Type": "application/x-www-form-urlencoded"
@@ -504,16 +522,152 @@
 			}
 		});
 
-		document.getElementById("attachmentList").addEventListener("click", (event) => {
+		attachmentList.addEventListener("click", async (event) => {
 			const button = event.target.closest(".remove-attachment");
-			if (button) {
-				button.closest(".attachment-row").remove();
+			if (!button) {
+				return;
+			}
+
+			const row = button.closest(".attachment-row");
+			const pendingInputId = row.dataset.pendingInputId;
+			const attachmentId = row.dataset.attachmentId;
+
+			if (pendingInputId) {
+				document.getElementById(pendingInputId)?.remove();
+				row.remove();
+				toggleAttachmentEmptyMessage();
+				return;
+			}
+
+			if (!attachmentId || !confirm("Are you sure you want to delete this attachment?")) {
+				return;
+			}
+
+			try {
+				const formData = new URLSearchParams();
+				formData.append("action", "delete");
+				formData.append("attachmentId", attachmentId);
+
+				const res = await fetch(`${contextPath}/AttachmentController`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					body: formData.toString()
+				});
+
+				if (!res.ok) throw new Error("Failed request");
+
+				const result = await res.json();
+				if (!result.success) {
+					alert("Delete failed on server");
+					return;
+				}
+
+				row.remove();
+				toggleAttachmentEmptyMessage();
+			} catch (err) {
+				console.error(err);
+				alert("Server error while deleting attachment.");
 			}
 		});
 
-		document.querySelectorAll(".drop-zone").forEach((zone) => {
+		if (confirmAttachmentUpload) {
+			confirmAttachmentUpload.addEventListener("click", () => {
+				const input = document.getElementById("attachmentFileInput");
+				if (!input || !input.files || input.files.length === 0) {
+					return;
+				}
+
+				const file = input.files[0];
+				const pendingInputId = `pendingAttachment_${Date.now()}`;
+				input.id = pendingInputId;
+				input.name = "attachments";
+				input.classList.add("d-none");
+				pendingAttachmentInputs.appendChild(input);
+				addPendingAttachmentRow(file.name, pendingInputId);
+				resetAttachmentFileInput();
+			});
+		}
+
+		if (attachmentModal) {
+			attachmentModal.addEventListener("hidden.bs.modal", () => {
+				const input = document.getElementById("attachmentFileInput");
+				if (input) {
+					input.value = "";
+				}
+				const selectedFile = attachmentModal.querySelector(".selected-file");
+				if (selectedFile) {
+					selectedFile.textContent = "";
+				}
+			});
+		}
+
+		function addPendingAttachmentRow(fileName, pendingInputId) {
+			removeEmptyMessage("attachmentList");
+
+			const row = document.createElement("div");
+			row.className = "attachment-row border-bottom pb-2";
+			row.dataset.pendingInputId = pendingInputId;
+
+			const fileContainer = document.createElement("div");
+			const icon = document.createElement("i");
+			icon.className = "bi bi-file-earmark text-primary me-2";
+			const name = document.createElement("span");
+			name.className = "fw-semibold";
+			name.textContent = fileName;
+			fileContainer.append(icon, name);
+
+			const status = document.createElement("span");
+			status.className = "text-secondary small";
+			status.textContent = "Pending save";
+
+			const downloadPlaceholder = document.createElement("span");
+
+			const deleteButton = document.createElement("button");
+			deleteButton.type = "button";
+			deleteButton.className = "btn btn-outline-danger rounded-circle remove-attachment";
+			deleteButton.setAttribute("aria-label", "Delete attachment");
+			deleteButton.setAttribute("title", "Delete attachment");
+			deleteButton.innerHTML = '<i class="bi bi-trash"></i>';
+
+			row.append(fileContainer, status, downloadPlaceholder, deleteButton);
+			attachmentList.appendChild(row);
+		}
+
+		function resetAttachmentFileInput() {
+			const dropZone = document.querySelector("#attachmentUploadModal .drop-zone");
+			const input = document.createElement("input");
+			input.id = "attachmentFileInput";
+			input.className = "d-none upload-input";
+			input.type = "file";
+			input.accept = ".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx";
+			dropZone.appendChild(input);
+			wireDropZone(dropZone);
+		}
+
+		function toggleAttachmentEmptyMessage() {
+			const hasRows = attachmentList.querySelectorAll(".attachment-row").length > 0;
+			let noAttachmentsMessage = document.getElementById("noAttachmentsMessage");
+			if (!noAttachmentsMessage && !hasRows) {
+				noAttachmentsMessage = document.createElement("div");
+				noAttachmentsMessage.id = "noAttachmentsMessage";
+				noAttachmentsMessage.className = "no-items-message text-center text-muted py-3";
+				noAttachmentsMessage.textContent = "No attachment to show. Click \"Upload Attachment\" to add.";
+				attachmentList.appendChild(noAttachmentsMessage);
+			}
+			if (noAttachmentsMessage) {
+				noAttachmentsMessage.classList.toggle("d-none", hasRows);
+			}
+		}
+
+		function wireDropZone(zone) {
 			const input = zone.querySelector(".upload-input");
 			const selectedFile = zone.querySelector(".selected-file");
+			if (!input || input.dataset.wired === "true") {
+				return;
+			}
+			input.dataset.wired = "true";
 
 			function setSelectedFile(files) {
 				selectedFile.textContent = files && files.length ? files[0].name : "";
@@ -534,7 +688,9 @@
 			});
 
 			input.addEventListener("change", () => setSelectedFile(input.files));
-		});
+		}
+
+		document.querySelectorAll(".drop-zone").forEach((zone) => wireDropZone(zone));
 	</script>
 </body>
 </html>

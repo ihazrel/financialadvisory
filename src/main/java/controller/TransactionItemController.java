@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import dao.TransactionItemDAO;
+import util.ErrorUtil;
 
 /**
  * Servlet implementation class TransactionItemController
@@ -31,7 +32,8 @@ public class TransactionItemController extends HttpServlet {
 String action = request.getParameter("action");
 		
 		if (action == null || action.isEmpty()) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action parameter is missing");
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+					ErrorUtil.format("TransactionItemController.java", "doPost", "Action parameter is missing"));
 			return;
 		}
 		
@@ -53,7 +55,8 @@ String action = request.getParameter("action");
 				response.getWriter().write("{\"success\":true}");
 				break;
 			default:
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+						ErrorUtil.format("TransactionItemController.java", "doPost", "Invalid action"));
 		}
 	}
 

@@ -9,6 +9,7 @@ import java.util.*;
 
 import connection.DBConnection;
 import model.TransactionModel;
+import util.ErrorUtil;
 
 public class TransactionDAO {
 
@@ -77,7 +78,7 @@ public class TransactionDAO {
 			conn.close();
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionDAO.java", "getTransactionById", e);
 		}
 		
 		return null; // Placeholder return statement
@@ -153,7 +154,7 @@ public class TransactionDAO {
 			return transactions;
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionDAO.java", "getAllTransactions", e);
 		}
 		
 		return new ArrayList<>(); // Placeholder return statement
@@ -227,7 +228,7 @@ public class TransactionDAO {
 			return transactions;
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionDAO.java", "getTransactionsByDepartmentId", e);
 		}
 		
 		return new ArrayList<>(); // Placeholder return statement
@@ -276,7 +277,7 @@ public class TransactionDAO {
 			conn.close();
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("TransactionDAO.java", "createTransaction", e);
 		}
 		return null; // Return null for now, you can modify this to return the generated transaction ID if needed
 	}
@@ -290,7 +291,8 @@ public class TransactionDAO {
 				TransactionModel existingTransaction = getTransactionById(transaction.getTransactionId());
 				
 				if (existingTransaction == null) {
-					System.out.println("Transaction with ID " + transaction.getTransactionId() + " does not exist.");
+					System.out.println(ErrorUtil.format("TransactionDAO.java", "updateTransaction",
+							"Transaction with ID " + transaction.getTransactionId() + " does not exist."));
 					return null;
 				}
 				
@@ -313,7 +315,13 @@ public class TransactionDAO {
 				pstmt.setDate(12, (Date) transaction.getDateTransaction());
 				pstmt.setString(13, transaction.getStatus());
 				pstmt.setInt(14, transaction.getCreatedBy());
-				pstmt.setInt(15, transaction.getVerifiedBy());
+				
+				if (transaction.getVerifiedBy() != null) {
+				    pstmt.setInt(15, transaction.getVerifiedBy());
+				} else {
+				    pstmt.setNull(15, java.sql.Types.INTEGER); // Set to NULL if verifiedBy is null
+				}
+				
 				pstmt.setInt(16, transaction.getTransactionId());
 				
 				if (pstmt.executeUpdate() > 0) {
@@ -324,7 +332,7 @@ public class TransactionDAO {
 				}
 				
 			} catch (Exception e) {
-				System.out.println(e);
+				ErrorUtil.log("TransactionDAO.java", "updateTransaction", e);
 			}
 		 return null; // Return null if an error occurs
 	}
@@ -343,7 +351,10 @@ public class TransactionDAO {
 				
 				TransactionItemDAO transactionItemDAO = new TransactionItemDAO();
 				transactionItemDAO.deleteTransactionItemsByTransactionId(transactionId);
-
+				
+				AttachmentDAO attachmentDAO = new AttachmentDAO();
+				attachmentDAO.deleteAttachmentsByTransactionId(transactionId);
+				
 				String sql = "DELETE FROM transaction WHERE transactionId=?";
 				PreparedStatement pstmt = conn.prepareStatement(sql);
 				pstmt.setInt(1, transactionId);
@@ -351,7 +362,7 @@ public class TransactionDAO {
 				return true; // Return true to indicate successful deletion
 				
 			} catch (Exception e) {
-				System.out.println(e);
+				ErrorUtil.log("TransactionDAO.java", "deleteTransaction", e);
 			}
 		return false; // Return false if an error occurs
 	}

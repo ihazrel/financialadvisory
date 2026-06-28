@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import connection.DBConnection;
 import model.CategoryModel;
+import util.ErrorUtil;
 
 public class CategoryDAO {
 	public CategoryModel getCategoryById(int categoryId) {
@@ -28,7 +29,7 @@ public class CategoryDAO {
 			conn.close();
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("CategoryDAO.java", "getCategoryById", e);
 		}
 		
 		return null; // Placeholder return statement
@@ -48,7 +49,7 @@ public class CategoryDAO {
 			conn.close();
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("CategoryDAO.java", "getCategoryLabelById", e);
 			
 		}
 		return null;
@@ -76,7 +77,7 @@ public class CategoryDAO {
 			return categories;
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			ErrorUtil.log("CategoryDAO.java", "getAllCategories", e);
 		}
 		
 		return null; // Placeholder return statement

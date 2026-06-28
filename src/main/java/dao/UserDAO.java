@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 
 import model.UserModel;
 import connection.DBConnection;
+import util.ErrorUtil;
 
 public class UserDAO {
 	private static Connection conn = null;
@@ -50,7 +51,7 @@ public class UserDAO {
             conn.close();
 
         } catch(Exception e) {
-            e.printStackTrace();
+            ErrorUtil.log("UserDAO.java", "login", e);
         }
 
         return user; //return Object

@@ -3,6 +3,7 @@ package connection;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import util.ErrorUtil;
 
 public class DBConnection {
 	//define and initialize database driver
@@ -23,8 +24,7 @@ public class DBConnection {
 		try {
 			Class.forName(ORACLE_DRIVER);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorUtil.log("DBConnection.java", "getConnection", e);
 		}
 		
         return DriverManager.getConnection(
