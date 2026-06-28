@@ -1,11 +1,14 @@
 package model;
 
+import java.util.Date;
+
 public class ChatHistoryModel {
 
     private Integer chatHistoryId;
     private Integer chatId;
     private boolean promptOrResponse;
     private String content;
+    private Date dateCreated;
 
     public ChatHistoryModel() {}
 
@@ -18,6 +21,19 @@ public class ChatHistoryModel {
         this.chatId = chatId;
         this.promptOrResponse = promptOrResponse;
         this.content = content;
+    }
+
+    public ChatHistoryModel(Integer chatHistoryId,
+                            Integer chatId,
+                            boolean promptOrResponse,
+                            String content,
+                            Date dateCreated) {
+
+        this.chatHistoryId = chatHistoryId;
+        this.chatId = chatId;
+        this.promptOrResponse = promptOrResponse;
+        this.content = content;
+        this.dateCreated = dateCreated;
     }
 
     public Integer getChatHistoryId() {
@@ -50,5 +66,13 @@ public class ChatHistoryModel {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
     }
 }
