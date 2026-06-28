@@ -15,15 +15,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>AI Financial Advisory System</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/chatbot-widget.css?v=2">
+<jsp:include page="/includes/common-head.jsp" />
 <style>
 	.transaction-workspace {
 		max-width: 1180px;
@@ -49,14 +41,14 @@
 
 	.line-item-grid {
 		display: grid;
-		grid-template-columns: 150px minmax(180px, 1fr) 120px 140px 140px 44px;
+		grid-template-columns: 110px 110px 150px minmax(180px, 1fr) 120px 140px 140px 44px;
 		gap: .75rem;
 		align-items: center;
 	}
 
 	.attachment-row {
 		display: grid;
-		grid-template-columns: minmax(180px, 1fr) 150px 44px;
+		grid-template-columns: 110px 110px minmax(180px, 1fr) 180px 120px minmax(180px, 1fr) 44px;
 		gap: .75rem;
 		align-items: center;
 	}
@@ -72,30 +64,10 @@
 <body class="bg-light">
 	<div class="container-fluid">
 		<div class="row min-vh-100">
-			<aside class="col-12 col-lg-2 text-white p-4"
-				style="background-color: #0D6EFD;">
-				<h4 class="fw-bold mb-4">
-					<i class="bi bi-wallet2 me-2"></i> Financial Advisory
-				</h4>
-				<div class="nav flex-column nav-pills gap-2">
-					<a class="nav-link text-white rounded-3" href="dashboard.jsp?role=staff">
-						<i class="bi bi-speedometer2 me-2"></i> Dashboard
-					</a>
-					<a class="nav-link active text-white rounded-3"
-						style="background-color: #084298;" href="TransactionController?action=list">
-						<i class="bi bi-cash-coin me-2"></i> Transactions
-					</a>
-					<a class="nav-link text-white rounded-3" href="aiadvisory.jsp?role=staff">
-						<i class="bi bi-robot me-2"></i> AI Advisory
-					</a>
-					<a class="nav-link text-white rounded-3" href="account-settings.jsp?role=staff">
-						<i class="bi bi-gear me-2"></i> Account Settings
-					</a>
-					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="<%= request.getContextPath() %>/logout">
-						<i class="bi bi-box-arrow-right me-2"></i> <b>Logout</b>
-					</a>
-				</div>
-			</aside>
+			<jsp:include page="/includes/sidebar.jsp">
+				<jsp:param name="sidebarRole" value="staff" />
+				<jsp:param name="activeMenu" value="transactions" />
+			</jsp:include>
 
 			<main class="col-12 col-lg-10 p-4">
 				<div class="transaction-workspace mx-auto">
@@ -171,6 +143,22 @@
 										<label class="form-label">Payment Method</label>
 										<input type="text" class="form-control rounded-3"
 											name="paymentMethod" value="${transaction != null ? transaction.paymentMethod : ''}" placeholder="e.g. Bank Transfer, Credit Card, Cash">
+									</div>
+									<div class="col-md-4">
+										<label class="form-label">Currency</label>
+										<select class="form-select rounded-3" name="currency">
+											<option selected>MYR</option>
+											<option>USD</option>
+											<option>AUD</option>
+										</select>
+									</div>
+									<div class="col-md-4">
+										<label class="form-label">Status</label>
+										<select class="form-select rounded-3" name="status">
+											<option selected>Pending Verification</option>
+											<option>Approved</option>
+											<option>Rejected</option>
+										</select>\
 									</div>
 									<div class="col-md-6">
 										<label class="form-label">Invoice / Reference Number</label>
@@ -423,7 +411,9 @@
 		
 		function addEmptyMessage(containerId, message) {
 			const noItemsMessage = document.getElementById(containerId).querySelector(".no-items-message");
-			noItemsMessage.classList.remove("d-none");
+			if (noItemsMessage) {
+				noItemsMessage.classList.remove("d-none");
+			}
         }
 
 		document.getElementById("addItemBtn").addEventListener("click", () => {

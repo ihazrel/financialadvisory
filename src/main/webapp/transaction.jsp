@@ -8,21 +8,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>AI Financial Advisory System</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- Bootstrap CSS -->
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-
-<!-- Bootstrap Icons -->
-<link rel="stylesheet"
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-
-<!-- Chatbot Widget CSS -->
-<link rel="stylesheet" href="css/chatbot-widget.css?v=2">
+<jsp:include page="/includes/common-head.jsp" />
 
 <style>
 	html {
@@ -41,57 +27,20 @@
 		<div class="row min-vh-100">
 
 			<!-- Sidebar -->
-			<aside class="col-12 col-lg-2 text-white p-4"
-				style="background-color: #0D6EFD;">
-				<h4 class="fw-bold mb-4">
-					<i class="bi bi-wallet2 me-2"></i> Financial Advisory
-				</h4>
-
-				<div class="nav flex-column nav-pills gap-2">
-					<a class="nav-link text-white rounded-3" href="dashboard.jsp?role=staff">
-						<i class="bi bi-speedometer2 me-2"></i> Dashboard
-					</a>
-
-					<a class="nav-link active text-white rounded-3" style="background-color: #084298;"
-						href="TransactionController?action=list">
-						<i class="bi bi-cash-coin me-2"></i> Transactions
-					</a>
-
-					<a class="nav-link text-white rounded-3" href="aiadvisory.jsp?role=staff">
-						<i class="bi bi-robot me-2"></i> AI Advisory
-					</a>
-
-					<a class="nav-link text-white rounded-3" href="account-settings.jsp?role=staff">
-						<i class="bi bi-gear me-2"></i> Account Settings
-					</a>
-
-					<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold" href="<%= request.getContextPath() %>/logout">
-						<i class="bi bi-box-arrow-right me-2"></i> <b>Logout</b>
-					</a>
-				</div>
-			</aside>
+			<jsp:include page="/includes/sidebar.jsp">
+				<jsp:param name="sidebarRole" value="staff" />
+				<jsp:param name="activeMenu" value="transactions" />
+			</jsp:include>
 
 			<!-- Main Content -->
 			<main class="col-12 col-lg-10 p-4">
 
 				<!-- Header -->
-				<div
-					class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-					<div>
-						<h1 class="fw-bold mb-1">Transaction Management</h1>
-						<p class="text-secondary mb-0">
-							Record, upload invoice, and submit company transactions for approval.
-						</p>
-					</div>
-
-					<div class="card border-0 shadow-sm rounded-4 mt-3 mt-md-0 role-welcome-card">
-						<div class="card-body py-2 px-3">
-							<span class="text-secondary">Welcome, </span>
-							<strong>Staff</strong>
-						</div>
-					</div>
-
-				</div>
+				<jsp:include page="/includes/page-header.jsp">
+					<jsp:param name="pageTitle" value="Transaction Management" />
+					<jsp:param name="pageSubtitle" value="Record, upload invoice, and submit company transactions for approval." />
+					<jsp:param name="pageRoleName" value="Staff" />
+				</jsp:include>
 
 				<!-- Summary Cards -->
 				<section class="row g-4 mb-4">
@@ -302,17 +251,10 @@
 			</main>
 		</div>
 	</div>
-
-	<jsp:include page="notification-widget.jsp" />
-
-	<jsp:include page="chatbot-widget.jsp" />
-
-	<!-- Bootstrap JS -->
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap JS -->
+	<jsp:include page="/includes/common-scripts.jsp" />
 
 	<!-- Chatbot Widget JS -->
-	<script src="js/chatbot-widget.js?v=2"></script>
 
 </body>
 </html>

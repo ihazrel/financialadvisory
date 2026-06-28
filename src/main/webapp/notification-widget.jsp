@@ -294,13 +294,14 @@
 		const sidebar = document.querySelector("aside[style*='background-color']");
 		const button = document.querySelector(".notification-button");
 		const path = window.location.pathname;
-		const role = path.includes("departmentmanager")
+		const selectedRole = new URLSearchParams(window.location.search).get("role");
+		const role = selectedRole || (path.includes("departmentmanager")
 			? "departmentmanager"
 			: path.includes("financialmanager")
 				? "financialmanager"
 				: path.includes("admin")
 					? "admin"
-					: "staff";
+					: "staff");
 
 		if (sidebar && button) {
 			button.style.setProperty("--notification-color",

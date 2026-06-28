@@ -12,6 +12,8 @@ import java.io.IOException;
 import dao.UserDAO;
 import model.UserModel;
 
+import dao.RoleDAO;
+import model.RoleModel;
 /**
  * Servlet implementation class UserController
  */
@@ -31,6 +33,32 @@ public class UserController extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String email = request.getParameter("email");
+
+        String password = request.getParameter("password");
+
+        UserDAO dao = new UserDAO();
+
+        UserModel user = dao.login(email, password);
+
+        //RoleDAO roleDAO = new RoleDAO();
+        
+        //List<Role> roleList = roleDAO.getAllRoles();
+        
+        
+        
+        if(user != null){
+            HttpSession session = request.getSession();
+
+            session.setAttribute("user",user);
+            
+            //session.setAttribute("roles", RoleDAO.getAllRoles());
+            
+            response.sendRedirect("dashboard.jsp");
+            
+        }else{
+        	response.sendRedirect( "login.jsp?error=1" );
+        }
         
 	}
 }
