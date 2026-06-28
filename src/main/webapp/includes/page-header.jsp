@@ -1,4 +1,5 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
 <%
 	String pageTitle = request.getParameter("pageTitle");
 	String pageSubtitle = request.getParameter("pageSubtitle");
@@ -12,7 +13,7 @@
 	<div class="card border-0 shadow-sm rounded-4 mt-3 mt-md-0 role-welcome-card">
 		<div class="card-body py-2 px-3">
 			<span class="text-secondary">Welcome, </span>
-			<strong><%= pageRoleName %></strong>
+			<strong>${user.name}</strong>
 		</div>
 	</div>
 </div>

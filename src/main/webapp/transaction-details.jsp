@@ -15,7 +15,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<jsp:include page="/includes/common-head.jsp" />
+<meta charset="UTF-8">
+<title>AI Financial Advisory System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/chatbot-widget.css?v=2">
 <style>
 	.transaction-workspace {
 		max-width: 1180px;
@@ -41,14 +49,14 @@
 
 	.line-item-grid {
 		display: grid;
-		grid-template-columns: 110px 110px 150px minmax(180px, 1fr) 120px 140px 140px 44px;
+		grid-template-columns: 150px minmax(180px, 1fr) 120px 140px 140px 44px;
 		gap: .75rem;
 		align-items: center;
 	}
 
 	.attachment-row {
 		display: grid;
-		grid-template-columns: 110px 110px minmax(180px, 1fr) 180px 120px minmax(180px, 1fr) 44px;
+		grid-template-columns: minmax(180px, 1fr) 150px 44px;
 		gap: .75rem;
 		align-items: center;
 	}
@@ -64,6 +72,8 @@
 <body class="bg-light">
 	<div class="container-fluid">
 		<div class="row min-vh-100">
+			
+			<!-- Sidebar -->
 			<jsp:include page="/includes/sidebar.jsp">
 				<jsp:param name="sidebarRole" value="staff" />
 				<jsp:param name="activeMenu" value="transactions" />
@@ -143,22 +153,6 @@
 										<label class="form-label">Payment Method</label>
 										<input type="text" class="form-control rounded-3"
 											name="paymentMethod" value="${transaction != null ? transaction.paymentMethod : ''}" placeholder="e.g. Bank Transfer, Credit Card, Cash">
-									</div>
-									<div class="col-md-4">
-										<label class="form-label">Currency</label>
-										<select class="form-select rounded-3" name="currency">
-											<option selected>MYR</option>
-											<option>USD</option>
-											<option>AUD</option>
-										</select>
-									</div>
-									<div class="col-md-4">
-										<label class="form-label">Status</label>
-										<select class="form-select rounded-3" name="status">
-											<option selected>Pending Verification</option>
-											<option>Approved</option>
-											<option>Rejected</option>
-										</select>\
 									</div>
 									<div class="col-md-6">
 										<label class="form-label">Invoice / Reference Number</label>
@@ -355,7 +349,6 @@
 				</div>
 				<div class="modal-body">
 					<label class="drop-zone d-flex flex-column justify-content-center align-items-center text-center p-4 w-100">
-						<i class="bi bi-paperclip fs-1 text-primary mb-2"></i>
 						<span class="fw-bold">Upload supporting attachment</span>
 						<span class="text-secondary small">Drag and drop file here, or click to browse</span>
 						<span class="selected-file text-primary small mt-2"></span>
@@ -369,9 +362,6 @@
 			</div>
 		</div>
 	</div>
-
-	<jsp:include page="notification-widget.jsp" />
-	<jsp:include page="chatbot-widget.jsp" />
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="js/chatbot-widget.js?v=2"></script>
@@ -411,9 +401,7 @@
 		
 		function addEmptyMessage(containerId, message) {
 			const noItemsMessage = document.getElementById(containerId).querySelector(".no-items-message");
-			if (noItemsMessage) {
-				noItemsMessage.classList.remove("d-none");
-			}
+			noItemsMessage.classList.remove("d-none");
         }
 
 		document.getElementById("addItemBtn").addEventListener("click", () => {

@@ -60,7 +60,7 @@
 		<% if ("staff".equals(sidebarRole)) { %>
 		<a class="<%= "transactions".equals(activeMenu) ? activeClass : normalClass %>"
 			<%= "transactions".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
-			href="<%= contextPath %>/staff-transaction.jsp">
+			href="<%= contextPath %>/transaction.jsp">
 			<i class="bi bi-cash-coin me-2"></i> Transactions
 		</a>
 		<% } %>

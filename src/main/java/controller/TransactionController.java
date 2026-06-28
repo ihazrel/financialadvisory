@@ -141,7 +141,7 @@ public class TransactionController extends HttpServlet {
 	    boolean success = transactionDAO.deleteTransaction(transactionId);
 	    
 	    if (success) {
-	    	response.sendRedirect("staff-transaction.jsp"); // Redirect to a success page after creation
+	    	response.sendRedirect("transaction.jsp"); // Redirect to a success page after creation
 	    }
 	}
 

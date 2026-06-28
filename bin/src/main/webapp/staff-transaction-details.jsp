@@ -85,7 +85,7 @@
 							<h1 class="fw-bold mb-1"><%= isCreate ? "Add New Transaction" : "Transaction Details" %></h1>
 							<p class="text-secondary mb-0">Record transaction information, item lines, and supporting attachments.</p>
 						</div>
-						<a class="btn btn-outline-secondary rounded-pill px-4" href="staff-transaction.jsp">
+						<a class="btn btn-outline-secondary rounded-pill px-4" href="transaction.jsp">
 							<i class="bi bi-arrow-left me-2"></i>Back to List
 						</a>
 					</div>
@@ -278,7 +278,7 @@
 								</div>
 
 								<div class="d-flex flex-wrap justify-content-end gap-2">
-									<a class="btn btn-outline-secondary rounded-pill px-4" href="staff-transaction.jsp">Cancel</a>
+									<a class="btn btn-outline-secondary rounded-pill px-4" href="transaction.jsp">Cancel</a>
 									
 									<button class="btn btn-primary rounded-pill px-4" type="submit" name="action" value="save">
 										<i class="bi bi-send-check me-2"></i>Save

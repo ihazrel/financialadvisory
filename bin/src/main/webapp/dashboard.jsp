@@ -156,7 +156,7 @@
 							<div class="card-body p-4">
 								<div class="d-flex justify-content-between align-items-center mb-3">
 									<h5 class="fw-bold mb-0">Recent Transactions</h5>
-									<a href="staff-transaction.jsp" class="text-decoration-none">View All</a>
+									<a href="transaction.jsp" class="text-decoration-none">View All</a>
 								</div>
 								<div class="table-responsive">
 									<table class="table table-hover align-middle">
