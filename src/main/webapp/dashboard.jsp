@@ -181,7 +181,7 @@
 								<p class="text-secondary">
 									Your company currently has a positive cashflow. Consider reviewing fixed costs to improve future profitability.
 								</p>
-								<a href="aiadvisory.jsp?role=<%= role %>" class="btn btn-primary w-100 rounded-pill">Open Advisory Chatbot</a>
+								<a href="AIAdvisoryController?role=<%= role %>" class="btn btn-primary w-100 rounded-pill">Open Advisory Chatbot</a>
 							</div>
 						</div>
 					</div>

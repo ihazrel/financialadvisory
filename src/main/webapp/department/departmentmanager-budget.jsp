@@ -36,7 +36,7 @@
 					<a class="nav-link text-white rounded-3" href="TransactionController?action=list">
 						<i class="bi bi-receipt me-2"></i> Transactions
 					</a>
-					<a class="nav-link text-white rounded-3" href="aiadvisory.jsp?role=departmentmanager">
+					<a class="nav-link text-white rounded-3" href="../AIAdvisoryController?role=departmentmanager">
 						<i class="bi bi-robot me-2"></i> AI Advisory
 					</a>
 					<a class="nav-link text-white rounded-3" href="account-settings.jsp?role=departmentmanager">
