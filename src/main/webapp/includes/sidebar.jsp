@@ -55,13 +55,13 @@
 		<c:if test="${isAdmin}">
 			<a class="<%= "users".equals(activeMenu) ? activeClass : normalClass %>"
 			   <%= "users".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
-			   href="<%= contextPath %>/admin-user-list.jsp">
+			   href="<%= contextPath %>/UserController?action=list">
 			    <i class="bi bi-people me-2"></i> User List
 			</a>
 		
 			<a class="<%= "departments".equals(activeMenu) ? activeClass : normalClass %>"
 			   <%= "departments".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
-			   href="<%= contextPath %>/admin-department-list.jsp">
+			   href="<%= contextPath %>/DepartmentController?action=list">
 			    <i class="bi bi-building me-2"></i> Department List
 			</a>
 			

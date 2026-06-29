@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>    
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,13 +25,13 @@
 				</h4>
 				<div class="nav flex-column nav-pills gap-2">
 					<a class="nav-link active text-white rounded-3"
-						style="background-color: #ff2c2c;" href="<%= request.getContextPath() %>/admin/admin-user-list.jsp">
+						style="background-color: #ff2c2c;" href="<%= request.getContextPath() %>/UserController?action=list">
 						<i class="bi bi-people me-2"></i> User List
 					</a>
-					<a class="nav-link text-white rounded-3" href="<%= request.getContextPath() %>/admin/admin-department-list.jsp">
+					<a class="nav-link text-white rounded-3" href="<%= request.getContextPath() %>/DepartmentController?action=list">
 						<i class="bi bi-building me-2"></i> Department List
 					</a>
-					<a class="nav-link text-white rounded-3" href="<%= request.getContextPath() %>/account-settings.jsp?role=admin">
+					<a class="nav-link text-white rounded-3" href="<%= request.getContextPath() %>/UserController?action=profile">
 						<i class="bi bi-gear me-2"></i> Account Settings
 					</a>
 
@@ -93,65 +94,84 @@
 						</div>
 
 						<div class="d-flex justify-content-end mb-4">
-							<a class="btn btn-danger rounded-pill px-4" href="admin-user-details.jsp?action=create">
+							<a class="btn btn-danger rounded-pill px-4" href="UserController?action=create">
 								<i class="bi bi-person-plus me-2"></i>Create New User
 							</a>
 						</div>
 
 						<div class="table-responsive">
 							<table class="table table-hover align-middle mb-0">
-								<thead>
-									<tr>
-										<th>User</th>
-										<th>Email</th>
-										<th>Role</th>
-										<th>Department</th>
-										<th>Status</th>
-										<th class="text-center">Action</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td><strong>System Admin</strong></td>
-										<td>admin@example.com</td>
-										<td><span class="badge text-bg-danger rounded-pill">System Admin</span></td>
-										<td>Not Applicable</td>
-										<td><span class="badge text-bg-success rounded-pill">Active</span></td>
-										<td class="text-center">
-											<span class="text-secondary">Not Applicable</span>
-										</td>
-									</tr>
-									<tr>
-										<td><strong>Abu Bakar</strong></td>
-										<td>abu@example.com</td>
-										<td><span class="badge text-bg-primary rounded-pill">Financial Manager</span></td>
-										<td>Finance</td>
-										<td><span class="badge text-bg-success rounded-pill">Active</span></td>
-										<td class="text-center">
-											<a class="btn btn-sm btn-outline-primary rounded-pill" href="admin-user-details.jsp?action=edit&id=abu"><i class="bi bi-pencil-square"></i></a>
-										</td>
-									</tr>
-									<tr>
-										<td><strong>Sarah Ahmad</strong></td>
-										<td>sarah@example.com</td>
-										<td><span class="badge text-bg-warning rounded-pill">Department Manager</span></td>
-										<td>Sales</td>
-										<td><span class="badge text-bg-success rounded-pill">Active</span></td>
-										<td class="text-center">
-											<a class="btn btn-sm btn-outline-primary rounded-pill" href="admin-user-details.jsp?action=edit&id=sarah"><i class="bi bi-pencil-square"></i></a>
-										</td>
-									</tr>
-									<tr>
-										<td><strong>Siti Aminah</strong></td>
-										<td>siti@example.com</td>
-										<td><span class="badge text-bg-secondary rounded-pill">Staff</span></td>
-										<td>Operations</td>
-										<td><span class="badge text-bg-success rounded-pill">Active</span></td>
-										<td class="text-center">
-											<a class="btn btn-sm btn-outline-primary rounded-pill" href="admin-user-details.jsp?action=edit&id=siti"><i class="bi bi-pencil-square"></i></a>
-										</td>
-									</tr>
-								</tbody>
+							    <thead>
+							        <tr>
+							            <th>User</th>
+							            <th>Email</th>
+							            <th>Role</th>
+							            <th>Department</th>
+							            <th class="text-center">Action</th>
+							        </tr>
+							    </thead>
+							
+							    <tbody>
+							
+							        <c:forEach var="user" items="${users}">
+							            <tr>
+							                <td>${user.name}</td>
+							                <td>${user.email}</td>
+							                <td>
+							                    <c:choose>
+							                        <c:when test="${user.roleId == 1}">
+							                            <span class="badge text-bg-danger rounded-pill">System Admin</span>
+							                        </c:when>
+							
+							                        <c:when test="${user.roleId == 2}">
+							                            <span class="badge text-bg-primary rounded-pill">Financial Manager</span>
+							                        </c:when>
+							
+							                        <c:when test="${user.roleId == 3}">
+							                            <span class="badge text-bg-warning rounded-pill">Department Manager</span>
+							                        </c:when>
+							
+							                        <c:otherwise>
+							                            <span class="badge text-bg-secondary rounded-pill">Staff</span>
+							                        </c:otherwise>
+							                    </c:choose>
+							                </td>
+							
+							                <td>
+							                    <c:choose>
+							                        <c:when test="${user.departmentId == 0}">
+							                            Not Applicable
+							                        </c:when>
+							                        <c:otherwise>
+							                            ${user.departmentId}
+							                        </c:otherwise>
+							                    </c:choose>
+							                </td>
+							                <td class="text-center">
+							
+							                    <c:choose>
+							                        <c:when test="${user.roleId == 1}">
+							                            <span class="text-secondary">Not Applicable</span>
+							                        </c:when>
+							                        <c:otherwise>
+							                            <a class="btn btn-sm btn-outline-primary rounded-pill"
+							                               href="<%= request.getContextPath() %>/UserController?action=view&id=${user.userId}">
+							                                <i class="bi bi-pencil-square"></i>
+							                            </a>
+							                        <a class="btn btn-sm btn-outline-danger rounded-pill"
+					                                   href="UserController?action=delete&id=${user.userId}"
+					                                   onclick="return confirm('Delete this user?')">
+					                                    <i class="bi bi-trash"></i>
+					                                </a>
+							                        </c:otherwise>
+							                    </c:choose>
+							                </td>
+							            </tr>
+							
+							        </c:forEach>
+							
+							    </tbody>
+							
 							</table>
 						</div>
 					</div>

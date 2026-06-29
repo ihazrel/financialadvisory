@@ -111,7 +111,6 @@
 </head>
 
 <body>
-<body>
 
 <%
 String error = request.getParameter("error");

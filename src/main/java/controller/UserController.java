@@ -8,8 +8,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
+import dao.DepartmentDAO;
+import dao.RoleDAO;
 import dao.UserDAO;
+import model.DepartmentModel;
+import model.RoleModel;
 import model.UserModel;
 import util.ErrorUtil;
 
@@ -30,38 +36,169 @@ public class UserController extends HttpServlet {
         // TODO Auto-generated constructor stub
     }
 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+    	
+    	String action = request.getParameter("action");
+    	
+    	try {
+        	if("list".equals(action)) {
+        		listUser(request, response);
+        	}else if("view".equals(action)) {
+        		viewUser(request, response);
+        	}else if("create".equals(action)) {
+        		showCreateForm(request, response);
+        	}else if("delete".equals(action)){
+        		deleteUser(request, response);
+        	}else {
+                showProfile(request, response);
+        	}
+    	}catch(SQLException ex) {
+			throw new ServletException(ex);
+		}
+    }
+    
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String userId = request.getParameter("userId"); //untuk update process perlu id
+		try {
+			if(userId == null) {
+				addUser(request, response);
+			}else
+				updateUser(request, response);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	
+	//This is a method to show all list of user
+	 private void listUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+
+	        List<UserModel> Userlist = UserDAO.getAllUsers();
+	        request.setAttribute("users", Userlist);
+	        request.getRequestDispatcher("admin/admin-user-list.jsp").forward(request, response);
+	}
+	
+	 // this is a method to display details of a user (id)
+	private void viewUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+		int idUser = Integer.parseInt(request.getParameter("id"));
+		//System.out.println("RAW ID PARAM = " + idUser);
+		
+		UserModel existingUser = UserDAO.getUserById(idUser);
+		List <DepartmentModel> existingDept = DepartmentDAO.getAllDept();
+		List <RoleModel> allRole = RoleDAO.getAllRoles();
+		
+		request.setAttribute("roles", allRole);
+		request.setAttribute("depts", existingDept);
+		request.setAttribute("user", existingUser); 
+		
+		request.setAttribute("mode", "update"); // to trigger the edit form
+        request.getRequestDispatcher("admin/admin-user-details.jsp").forward(request, response);
+	}
+	
+	private void showCreateForm (HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+
+		List <DepartmentModel> existingDept = DepartmentDAO.getAllDept();
+		List <RoleModel> allRole = RoleDAO.getAllRoles();
+		
+		request.setAttribute("mode", "create");
+		request.setAttribute("roles", allRole);
+		request.setAttribute("depts", existingDept);
+		request.setAttribute("user", new UserModel());
+		request.getRequestDispatcher("admin/admin-user-details.jsp").forward(request, response);
+	}
+	
+	private void addUser (HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+		
+        String name = request.getParameter("fullName");
         String email = request.getParameter("email");
-
         String password = request.getParameter("password");
-
-        UserDAO dao = new UserDAO();
-
-        UserModel user = dao.login(email, password);
-
-        //RoleDAO roleDAO = new RoleDAO();
+        int roleId = Integer.parseInt(request.getParameter("roleId"));
+        int departmentId = Integer.parseInt(request.getParameter("departmentId"));
         
-        //List<Role> roleList = roleDAO.getAllRoles();
+        UserModel userData = new UserModel();
         
+        userData.setName(name);
+        userData.setEmail(email);
+        userData.setPassword(password);
+        userData.setRoleId(roleId);
+        userData.setDepartmentId(departmentId);
         
+        UserDAO.addUser(userData);
         
-        if(user != null){
-            HttpSession session = request.getSession();
-
-            session.setAttribute("user",user);
-            
-            //session.setAttribute("roles", RoleDAO.getAllRoles());
-            
-            response.sendRedirect("dashboard.jsp");
-            
-        }else{
-            request.getSession().setAttribute("error",
-                    ErrorUtil.format("UserController.java", "doPost", "Invalid email or password"));
-        	response.sendRedirect( "login.jsp?error=1" );
+        response.sendRedirect(request.getContextPath() + "/UserController?action=list");
+	}
+	
+	// go to update user UserDAO
+	private void updateUser (HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+		
+		int userId = Integer.parseInt(request.getParameter("userId"));
+		String name = request.getParameter("fullName");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        int roleId = Integer.parseInt(request.getParameter("roleId"));
+        int departmentId = Integer.parseInt(request.getParameter("departmentId"));
+        
+        //System.out.print("password");
+        
+        // to fetch current passsword
+        UserModel existingUser = UserDAO.getUserById(userId);
+        
+        UserModel userData = new UserModel();
+        
+        userData.setUserId(userId);
+        userData.setName(name);
+        userData.setEmail(email);
+        userData.setPassword(password);
+        userData.setRoleId(roleId);
+        userData.setDepartmentId(departmentId);
+        
+        if (password != null && !password.trim().isEmpty()) {
+        	userData.setPassword(password); // new password
+        } else {
+        	userData.setPassword(existingUser.getPassword()); // keep old password
         }
         
+        UserDAO.updateUser(userData);
+        
+        response.sendRedirect(request.getContextPath() + "/UserController?action=list");
 	}
+	
+	public void deleteUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+		int id = Integer.parseInt(request.getParameter("id"));
+		UserDAO.deleteUser(id);
+		response.sendRedirect(request.getContextPath() + "/UserController?action=list");
+	}
+	
+	// this is user setting show form only
+	private void showProfile(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException, SQLException {
+
+	    HttpSession session = request.getSession(false);
+
+	    UserModel loginUser = (UserModel) session.getAttribute("user");
+
+	    int userId = loginUser.getUserId();
+
+	    //UserDAO dao = new UserDAO();
+
+	    UserModel user = UserDAO.getUserById(userId);
+	    
+		List <DepartmentModel> existingDept = DepartmentDAO.getAllDept();
+		List <RoleModel> allRole = RoleDAO.getAllRoles();
+		
+		request.setAttribute("roles", allRole);
+		request.setAttribute("depts", existingDept);
+	    request.setAttribute("user", user);
+	    request.setAttribute("roleId", user.getRoleId());
+	    request.getRequestDispatcher("account-settings.jsp")
+	           .forward(request, response);
+	}
+	
 }

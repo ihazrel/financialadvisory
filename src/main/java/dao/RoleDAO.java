@@ -4,10 +4,13 @@ import connection.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.RoleModel;
+import model.UserModel;
 import util.ErrorUtil;
+import connection.DBConnection;
 
 public class RoleDAO {
 	private static Connection conn = null;
@@ -40,4 +43,7 @@ public class RoleDAO {
 
         return list;
     }
+	
+    // this is for dashboard, that will get the user name and role
+
 }

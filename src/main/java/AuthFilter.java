@@ -63,10 +63,14 @@ public class AuthFilter implements Filter {
             return;
         }
 
+            //res.sendRedirect(contextPath + "/admin/admin-user-list.jsp");
+            //return;
+        //}
+
         // FINANCIAL MANAGER ONLY PAGES
         if (url.contains("financialmanager-") && roleId != 2) {
 
-            session.setAttribute("error", ErrorUtil.format("AuthFilter.java", "doFilter", "Access denied"));
+            session.setAttribute("error", "Access denied");
             
             res.sendRedirect(contextPath + "/dashboard.jsp");
             return;
