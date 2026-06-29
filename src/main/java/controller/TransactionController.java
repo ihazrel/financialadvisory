@@ -231,7 +231,6 @@ public class TransactionController extends HttpServlet {
 		
 		if (curr_user != null && RoleHelper.isFinancialManager(curr_user)) {
 	        transactions = transactionDAO.getAllTransactions();
-	        return;
 	    } else if (curr_user != null && (RoleHelper.isDepartmentManager(curr_user) || RoleHelper.isStaff(curr_user))) {
 	        transactions = transactionDAO.getTransactionsByDepartmentId(curr_user.getDepartmentId());
 	    }
