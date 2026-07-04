@@ -237,6 +237,8 @@ public class TransactionController extends HttpServlet {
 		
 		request.setAttribute("transactions_list", transactions);
 		
+		request.setAttribute("isReadOnly", curr_user != null && !RoleHelper.isStaff(curr_user));
+		
 		request.getRequestDispatcher("transaction.jsp").forward(request, response);
 	}	
 	
@@ -261,7 +263,12 @@ public class TransactionController extends HttpServlet {
 	        // dropdown list
 	        request.setAttribute("categories_dropdown", categories);
 	        
-	        boolean isEditable = transaction.getStatus().equalsIgnoreCase("draft") || transaction.getStatus().equalsIgnoreCase("rejected");
+	        boolean isEditable = curr_user != null 
+	        					&& RoleHelper.isStaff(curr_user)  // is Staff
+	        					&& curr_user.getDepartmentId() == transaction.getDepartmentId()  // Staff of the same department as transaction
+	        					&& (transaction.getStatus().equalsIgnoreCase("draft")
+	        							|| transaction.getStatus().equalsIgnoreCase("rejected"));  // transaction is draft or rejected
+	        
 	        boolean isApprover = curr_user != null 
 	        					&& RoleHelper.isDepartmentManager(curr_user)  // is HoD or Financial Manager
 	        					&& curr_user.getDepartmentId() == transaction.getDepartmentId()  // HoD of the same department as transaction

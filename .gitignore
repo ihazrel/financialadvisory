@@ -14,3 +14,6 @@
 README.md
 .settings/org.eclipse.jdt.core.prefs
 scripts/vscode-tomcat.ps1
+/scripts
+.vscode/
+.metadata/
