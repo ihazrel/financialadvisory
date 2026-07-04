@@ -51,70 +51,76 @@
 
     <div class="nav flex-column nav-pills gap-2">
 
-        <c:if test="${sessionScope.user.roleId == 1}">
-            <a class="nav-link text-white rounded-3 ${activeMenu == 'users' ? 'active' : ''}"
-               style="${activeMenu == 'users' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-               href="${contextPath}/UserController?action=list">
-                <i class="bi bi-people me-2"></i> User List
-            </a>
-
-            <a class="nav-link text-white rounded-3 ${activeMenu == 'departments' ? 'active' : ''}"
-               style="${activeMenu == 'departments' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-               href="${contextPath}/DepartmentController?action=list">
-                <i class="bi bi-building me-2"></i> Department List
-            </a>
-
-            <a class="nav-link text-white rounded-3 ${activeMenu == 'settings' ? 'active' : ''}"
-               style="${activeMenu == 'settings' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-               href="${contextPath}/UserController?action=profile">
-                <i class="bi bi-gear me-2"></i> Account Settings
-            </a>
-        </c:if>
-
-        <c:if test="${sessionScope.user.roleId != 1}">
-            <a class="nav-link text-white rounded-3 ${activeMenu == 'dashboard' ? 'active' : ''}"
-               style="${activeMenu == 'dashboard' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-               href="${contextPath}/DashboardController?action=userInfo">
-                <i class="bi bi-speedometer2 me-2"></i> Dashboard
-            </a>
-
-            <a class="nav-link text-white rounded-3 ${activeMenu == 'transactions' ? 'active' : ''}"
-               style="${activeMenu == 'transactions' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-               href="${contextPath}/TransactionController?action=list">
-                <i class="bi bi-cash-coin me-2"></i> Transactions
-            </a>
-
-            <c:if test="${sessionScope.user.roleId == 2 || sessionScope.user.roleId == 3}">
-                <a class="nav-link text-white rounded-3 ${activeMenu == 'categories' ? 'active' : ''}"
-                   style="${activeMenu == 'categories' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-                   href="${contextPath}/departmentmanager-category-list.jsp">
-                    <i class="bi bi-tags me-2"></i> Category
-                </a>
-
-                <a class="nav-link text-white rounded-3 ${activeMenu == 'history' ? 'active' : ''}"
-                   style="${activeMenu == 'history' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-                   href="${contextPath}/departmentmanager-history.jsp">
-                    <i class="bi bi-receipt me-2"></i> History
-                </a>
-            </c:if>
-
-            <a class="nav-link text-white rounded-3 ${activeMenu == 'advisory' ? 'active' : ''}"
-               style="${activeMenu == 'advisory' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-               href="${contextPath}/aiadvisory.jsp">
-                <i class="bi bi-robot me-2"></i> AI Advisory
-            </a>
-
-            <a class="nav-link text-white rounded-3 ${activeMenu == 'settings' ? 'active' : ''}"
-               style="${activeMenu == 'settings' ? 'background-color: '.concat(sidebarActiveColor).concat(';') : ''}"
-               href="${contextPath}/UserController?action=profile">
-                <i class="bi bi-gear me-2"></i> Account Settings
-            </a>
-        </c:if>
-
-        <a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold"
-           href="${contextPath}/logout">
-            <i class="bi bi-box-arrow-right me-2"></i> Logout
-        </a>
-
-    </div>
+<aside class="col-12 col-lg-2 text-white p-4" style="background-color: <%= sidebarColor %>;">
+	<h4 class="fw-bold mb-4">
+		<i class="bi <%= sidebarIcon %> me-2"></i> <%= sidebarTitle %>
+	</h4>
+	<div class="nav flex-column nav-pills gap-2">
+		
+		<c:if test="${isAdmin}">
+			<a class="<%= "users".equals(activeMenu) ? activeClass : normalClass %>"
+			   <%= "users".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+			   href="<%= contextPath %>/UserController?action=list">
+			    <i class="bi bi-people me-2"></i> User List
+			</a>
+		
+			<a class="<%= "departments".equals(activeMenu) ? activeClass : normalClass %>"
+			   <%= "departments".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+			   href="<%= contextPath %>/DepartmentController?action=list">
+			    <i class="bi bi-building me-2"></i> Department List
+			</a>
+			
+			<a class="<%= "budget".equals(activeMenu) ? activeClass : normalClass %>"
+			   <%= "budget".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+			   href="<%= contextPath %>/departmentmanager-budget.jsp">
+			    <i class="bi bi-wallet2 me-2"></i> Budget Management
+			</a>
+		</c:if>
+		
+		<c:if test="${!isAdmin}">
+			<a class="<%= "dashboard".equals(activeMenu) ? activeClass : normalClass %>"
+			   <%= "dashboard".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+			   href="<%= contextPath %>/dashboard.jsp">
+			    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+			</a>
+			
+			<a class="<%= "transactions".equals(activeMenu) ? activeClass : normalClass %>"
+			   <%= "transactions".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+			   href="<%= contextPath %>/TransactionController?action=list">
+			    <i class="bi bi-cash-coin me-2"></i> Transactions
+			</a>
+			
+			<c:if test="${isFinancialManager || isDepartmentManager }">
+				<a class="<%= "categories".equals(activeMenu) ? activeClass : normalClass %>"
+				   <%= "categories".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+				   href="<%= contextPath %>/departmentmanager-category-list.jsp">
+				    <i class="bi bi-tags me-2"></i> Category
+				</a>
+				
+				<a class="<%= "history".equals(activeMenu) ? activeClass : normalClass %>"
+				   <%= "history".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+				   href="<%= contextPath %>/departmentmanager-history.jsp">
+				    <i class="bi bi-receipt me-2"></i> History
+				</a>
+			</c:if>
+			
+			<a class="<%= "advisory".equals(activeMenu) ? activeClass : normalClass %>"
+			   <%= "advisory".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+			   href="<%= contextPath %>/AIAdvisoryController">
+			    <i class="bi bi-robot me-2"></i> AI Advisory
+			</a>
+			
+			<a class="<%= "settings".equals(activeMenu) ? activeClass : normalClass %>"
+			   <%= "settings".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
+			   href="<%= contextPath %>/account-settings.jsp">
+			    <i class="bi bi-gear me-2"></i> Account Settings
+			</a>
+		</c:if>
+		
+			<a class="nav-link text-white bg-danger rounded-3 mt-4 shadow-sm fw-bold"
+			   href="<%= contextPath %>/login.jsp"
+			   onclick="localStorage.removeItem('demoRole')">
+			    <i class="bi bi-box-arrow-right me-2"></i> Logout
+			</a>
+	</div>
 </aside>
