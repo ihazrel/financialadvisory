@@ -29,7 +29,8 @@
 					<jsp:param name="pageRoleName" value="${role.name}" />
 				</jsp:include>
 
-				<c:if test="${user.roleId == 1} ">
+				<c:if test="${user.roleId == 4}">
+				
 				<section class="row g-4 mb-4">
 					<div class="col-md-6 col-xl-3">
 						<div class="card border-0 shadow-sm rounded-4 h-100">
@@ -160,7 +161,7 @@
 								<p class="text-secondary">
 									Your company currently has a positive cashflow. Consider reviewing fixed costs to improve future profitability.
 								</p>
-								<a href="AIAdvisoryController?role=<%= role %>" class="btn btn-primary w-100 rounded-pill">Open Advisory Chatbot</a>
+								<a href="AIAdvisoryController?role=${user.roleId}" class="btn btn-primary w-100 rounded-pill">Open Advisory Chatbot</a>
 							</div>
 						</div>
 					</div>
