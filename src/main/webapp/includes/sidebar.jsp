@@ -101,7 +101,7 @@
 			
 			<a class="<%= "advisory".equals(activeMenu) ? activeClass : normalClass %>"
 			   <%= "advisory".equals(activeMenu) ? "style=\"background-color: " + sidebarActiveColor + ";\"" : "" %>
-			   href="<%= contextPath %>/aiadvisory.jsp">
+			   href="<%= contextPath %>/AIAdvisoryController">
 			    <i class="bi bi-robot me-2"></i> AI Advisory
 			</a>
 			
