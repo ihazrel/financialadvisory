@@ -152,7 +152,9 @@ public class AIAdvisoryController extends HttpServlet {
         StringBuilder builder = new StringBuilder();
         builder.append("You are an AI financial advisory assistant for an internal financial advisory system.\n");
         builder.append("Use only the provided financial data context. Do not invent database records.\n");
-        builder.append("Give practical, concise recommendations with reasons and risks.\n");
+        builder.append("Answer in 2 to 4 short lines, under 5 lines total.\n");
+        builder.append("Be compact and complete: no long intro, no markdown headings, no unfinished list items.\n");
+        builder.append("Give only the most important recommendation, reason, and next action.\n");
         builder.append("Do not produce SQL. Do not request or reveal secrets.\n\n");
 
         builder.append("Financial context:\n");
