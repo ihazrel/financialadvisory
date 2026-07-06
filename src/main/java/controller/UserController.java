@@ -14,6 +14,7 @@ import java.util.List;
 import dao.DepartmentDAO;
 import dao.RoleDAO;
 import dao.UserDAO;
+import helper.RoleHelper;
 import helper.SessionHelper;
 import model.DepartmentModel;
 import model.RoleModel;
@@ -72,6 +73,8 @@ public class UserController extends HttpServlet {
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			setFlash(request, "danger", "User could not be saved. Please try again.");
+			response.sendRedirect(request.getContextPath() + "/UserController?action=list");
 		}
 	}
 	
@@ -163,7 +166,15 @@ public class UserController extends HttpServlet {
         userData.setRoleId(roleId);
         userData.setDepartmentId(departmentId);
         
-        UserDAO.addUser(userData);
+        if (RoleHelper.isDepartmentManager(userData) && UserDAO.checkIfDepartmentManagerExists(departmentId, null)) {
+			setFlash(request, "danger", "A department manager already exists for this department.");
+			response.sendRedirect(request.getContextPath() + "/UserController?action=list");
+			return;
+		}
+        
+        boolean success = UserDAO.addUser(userData);
+        setFlash(request, success ? "success" : "danger",
+        		success ? "User created successfully." : "User could not be created. Please try again.");
         
         response.sendRedirect(request.getContextPath() + "/UserController?action=list");
 	}
@@ -192,18 +203,28 @@ public class UserController extends HttpServlet {
         userData.setRoleId(roleId);
         userData.setDepartmentId(departmentId);
         
+        if (RoleHelper.isDepartmentManager(userData) && UserDAO.checkIfDepartmentManagerExists(departmentId, userId)) {
+			setFlash(request, "danger", "A department manager already exists for this department.");
+			response.sendRedirect(request.getContextPath() + "/UserController?action=list");
+			return;
+		}
+        
         if (password != null && !password.trim().isEmpty()) {
         	userData.setPassword(password); // new password
         } else {
         	userData.setPassword(existingUser.getPassword()); // keep old password
         }
         
-        UserDAO.updateUser(userData);
+        boolean success = UserDAO.updateUser(userData);
         String source = request.getParameter("source");
         
         UserModel temp = UserDAO.getUserById(userData.getUserId());
         HttpSession session = request.getSession();
-        session.setAttribute("user", temp);
+        if (temp != null) {
+        	session.setAttribute("user", temp);
+        }
+        setFlash(request, success ? "success" : "danger",
+        		success ? "User updated successfully." : "User could not be updated. Please try again.");
         
         if ("profile".equals(source)) {
         	response.sendRedirect(request.getContextPath() + "/UserController?action=showUserProfile");
@@ -213,7 +234,9 @@ public class UserController extends HttpServlet {
 	
 	public void deleteUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
 		int id = Integer.parseInt(request.getParameter("id"));
-		UserDAO.deleteUser(id);
+		boolean success = UserDAO.deleteUser(id);
+		setFlash(request, success ? "success" : "danger",
+				success ? "User deleted successfully." : "User could not be deleted. Please try again.");
 		response.sendRedirect(request.getContextPath() + "/UserController?action=list");
 	}
 	
@@ -240,6 +263,12 @@ public class UserController extends HttpServlet {
 	    request.setAttribute("roleId", user.getRoleId());
 	    request.getRequestDispatcher("account-settings.jsp")
 	           .forward(request, response);
+	}
+
+	private void setFlash(HttpServletRequest request, String type, String message) {
+		HttpSession session = request.getSession();
+		session.setAttribute("flashType", type);
+		session.setAttribute("flashMessage", message);
 	}
 	
 }

@@ -58,6 +58,8 @@
 					</div>
 				</div>
 
+				<jsp:include page="/includes/flash-alert.jsp" />
+
 				<section class="card border-0 shadow-sm rounded-4">
 					<div class="card-body p-4">
 					
@@ -175,11 +177,11 @@
 							
 							                <td>
 							                    <c:choose>
-							                        <c:when test="${user.departmentId == 0}">
+							                        <c:when test="${empty user.departmentId || user.departmentId == 0 || empty user.departmentName}">
 							                            Not Applicable
 							                        </c:when>
 							                        <c:otherwise>
-							                            ${user.departmentId}
+							                            ${user.departmentName}
 							                        </c:otherwise>
 							                    </c:choose>
 							                </td>
